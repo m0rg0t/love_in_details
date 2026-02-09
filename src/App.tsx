@@ -29,7 +29,7 @@ import type { PanelId, Answer } from './types';
 const App: React.FC = () => {
   const appearance = useAppearance();
   const { state, dispatch } = useQuizState();
-  const { showInterstitialAd, showBannerAd } = useVKAds();
+  const { showInterstitialAd, showBannerAd, hideBannerAd } = useVKAds();
 
   const setActivePanel = useCallback((panel: PanelId) => {
     if (panel === 'welcome') {
@@ -94,8 +94,9 @@ const App: React.FC = () => {
   const handleStart = useCallback(() => {
     dispatch({ type: 'START_QUIZ' });
     pushPanel('quiz-a');
+    showBannerAd(); // Show banner ad when quiz starts
     trackQuizStart();
-  }, [dispatch, pushPanel]);
+  }, [dispatch, pushPanel, showBannerAd]);
 
   const handleAnswer = useCallback((questionId: string, answer: Answer) => {
     dispatch({ type: 'ANSWER_QUESTION', questionId, answer });
@@ -113,12 +114,11 @@ const App: React.FC = () => {
       const { results, stats } = compareAnswers(state.answersA, state.answersB, questions);
       dispatch({ type: 'FINISH_QUIZ', results, stats });
       pushPanel('results');
-      showBannerAd();
       trackQuizComplete(stats.matchCount, stats.totalQuestions);
     } else {
       dispatch({ type: 'NEXT_QUESTION' });
     }
-  }, [state.currentQuestion, state.playerLabel, state.answersA, state.answersB, dispatch, pushPanel, showInterstitialAd, showBannerAd]);
+  }, [state.currentQuestion, state.playerLabel, state.answersA, state.answersB, dispatch, pushPanel, showInterstitialAd]);
 
   const handleHandoffReady = useCallback(() => {
     dispatch({ type: 'START_PLAYER_B' });
@@ -128,8 +128,9 @@ const App: React.FC = () => {
   const handleRestart = useCallback(() => {
     dispatch({ type: 'RESTART' });
     pushPanel('welcome');
+    hideBannerAd(); // Hide banner ad when restarting
     trackRestart();
-  }, [dispatch, pushPanel]);
+  }, [dispatch, pushPanel, hideBannerAd]);
 
   const currentAnswers = state.playerLabel === 'A' ? state.answersA : state.answersB;
 
