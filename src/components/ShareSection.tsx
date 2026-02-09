@@ -1,11 +1,14 @@
 import React, { useCallback } from 'react';
 import bridge from '@vkontakte/vk-bridge';
 import { Button } from '@vkontakte/vkui';
-import { Icon24ShareOutline, Icon28StoryOutline } from '@vkontakte/icons';
+import { Icon24ShareOutline, Icon28StoryOutline, Icon24GiftOutline } from '@vkontakte/icons';
 import type { ComparisonStats } from '../types';
 import { isVKBridge } from '../utils/platform';
 import { generateStoryImage } from '../utils/storyCanvas';
-import { trackShare } from '../utils/analytics';
+import { trackShare, trackOpenOtredach } from '../utils/analytics';
+
+const OTREDACH_APP_ID = 54160489;
+const VALENTINE_TAG = 'День святого Валентина';
 
 interface ShareSectionProps {
   stats: ComparisonStats;
@@ -40,12 +43,42 @@ export const ShareSection: React.FC<ShareSectionProps> = ({ stats }) => {
     }
   }, []);
 
+  const handleOpenOtredach = useCallback(async () => {
+    const encodedTag = encodeURIComponent(VALENTINE_TAG);
+    const location = `all_templates?tag=${encodedTag}`;
+
+    try {
+      await bridge.send('VKWebAppOpenApp', {
+        app_id: OTREDACH_APP_ID,
+        location,
+      });
+      trackOpenOtredach(true);
+    } catch (err) {
+      console.error('[Share] Otredach error:', err);
+      trackOpenOtredach(false);
+
+      // Fallback для standalone режима
+      if (!isVKBridge()) {
+        const url = `https://vk.com/app${OTREDACH_APP_ID}#/${location}`;
+        window.open(url, '_blank');
+      }
+    }
+  }, []);
+
   return (
     <div className="share-section">
       <h3 className="share-section__title">Поделиться результатом</h3>
 
       {isVK ? (
         <div className="share-section__buttons">
+          <Button
+            size="l"
+            mode="outline"
+            before={<Icon24GiftOutline />}
+            onClick={handleOpenOtredach}
+          >
+            Создать открытку
+          </Button>
           <Button
             size="l"
             mode="outline"
@@ -65,7 +98,7 @@ export const ShareSection: React.FC<ShareSectionProps> = ({ stats }) => {
         </div>
       ) : (
         <p className="share-section__note">
-          Функция «Поделиться» доступна при запуске внутри VK
+          Функции «Поделиться» и «Создать открытку» доступны при запуске внутри VK
         </p>
       )}
     </div>

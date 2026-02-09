@@ -43,3 +43,7 @@ export function trackAdShow(format: 'interstitial' | 'banner', success: boolean)
 export function trackRestart() {
   track('restart');
 }
+
+export function trackOpenOtredach(success: boolean) {
+  track('open_otredach', { success: bool(success) });
+}
