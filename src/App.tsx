@@ -23,6 +23,7 @@ import { questions } from './data/questions';
 import { compareAnswers } from './utils/comparison';
 import { trackAppStart, trackQuizStart, trackPlayerSwitch, trackQuizComplete, trackRestart } from './utils/analytics';
 import { checkVKBridge, isVKBridge } from './utils/platform';
+import { isDebugMode, getDebugPanel, getDebugState } from './utils/debugMode';
 import type { PanelId, Answer } from './types';
 
 const App: React.FC = () => {
@@ -47,6 +48,48 @@ const App: React.FC = () => {
       trackAppStart(isVKBridge() ? 'vk' : 'standalone');
     });
   }, []);
+
+  // Debug mode: populate state with mock data for screenshots
+  useEffect(() => {
+    if (import.meta.env.DEV && isDebugMode()) {
+      const debugState = getDebugState();
+
+      // Start quiz if on quiz panel
+      if (debugState.panel === 'quiz-a' || debugState.panel === 'quiz-b') {
+        dispatch({ type: 'START_QUIZ' });
+
+        // Navigate to the correct question by dispatching NEXT_QUESTION
+        for (let i = 0; i < debugState.currentQuestion; i++) {
+          dispatch({ type: 'NEXT_QUESTION' });
+        }
+      }
+
+      // Populate Player A answers
+      Object.entries(debugState.answersA).forEach(([qId, answer]) => {
+        dispatch({ type: 'ANSWER_QUESTION', questionId: qId, answer });
+      });
+
+      // Switch to Player B if needed
+      if (debugState.panel === 'quiz-b') {
+        dispatch({ type: 'START_PLAYER_B' });
+
+        // Navigate to the correct question for player B
+        for (let i = 0; i < debugState.currentQuestion; i++) {
+          dispatch({ type: 'NEXT_QUESTION' });
+        }
+      }
+
+      // Populate Player B answers
+      Object.entries(debugState.answersB).forEach(([qId, answer]) => {
+        dispatch({ type: 'ANSWER_QUESTION', questionId: qId, answer });
+      });
+
+      // Finish quiz with results if on results panel
+      if (debugState.panel === 'results') {
+        dispatch({ type: 'FINISH_QUIZ', results: debugState.results!, stats: debugState.stats! });
+      }
+    }
+  }, [dispatch]);
 
   const handleStart = useCallback(() => {
     dispatch({ type: 'START_QUIZ' });
@@ -90,6 +133,11 @@ const App: React.FC = () => {
 
   const currentAnswers = state.playerLabel === 'A' ? state.answersA : state.answersB;
 
+  // Debug mode: override active panel
+  const activePanel = (import.meta.env.DEV && isDebugMode())
+    ? getDebugPanel() ?? state.panel
+    : state.panel;
+
   return (
     <ConfigProvider colorScheme={appearance ?? undefined}>
       <AdaptivityProvider>
@@ -97,7 +145,7 @@ const App: React.FC = () => {
           <VKInsetsProvider>
             <SplitLayout>
               <SplitCol>
-                <View activePanel={state.panel}>
+                <View activePanel={activePanel}>
                   <WelcomeScreen id="welcome" onStart={handleStart} />
                   <QuizScreen
                     id="quiz-a"

@@ -45,3 +45,6 @@ vite.config.js
 # Misc
 .cache/
 .temp/
+
+# Screenshots
+screenshots/output/
