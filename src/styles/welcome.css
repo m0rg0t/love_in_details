@@ -1,0 +1,64 @@
+/**
+ * Welcome screen styles
+ */
+
+.welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--space-xl);
+  padding-top: var(--effective-inset-top);
+  padding-bottom: var(--effective-inset-bottom);
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.welcome__emoji {
+  font-size: 64px;
+  margin-bottom: var(--space-lg);
+  animation: heartbeat 1.5s ease infinite;
+}
+
+.welcome__title {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  margin: 0 0 var(--space-sm);
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.welcome__subtitle {
+  font-size: var(--font-size-base);
+  opacity: 0.7;
+  margin: 0 0 var(--space-2xl);
+}
+
+.welcome__rules {
+  text-align: left;
+  width: 100%;
+  max-width: 360px;
+  margin-bottom: var(--space-2xl);
+}
+
+.welcome__rule {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+  font-size: var(--font-size-base);
+  line-height: 1.4;
+}
+
+.welcome__rule-emoji {
+  font-size: var(--font-size-xl);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.welcome__start-button {
+  max-width: 360px;
+}

@@ -1,0 +1,106 @@
+/**
+ * CSS Variables — Design tokens for "Любовь в деталях"
+ * Warm pink-to-purple palette, mobile-first
+ */
+
+:root {
+  /* === Brand Colors === */
+  --accent-primary: #e8739e;
+  --accent-secondary: #7c5cbf;
+  --accent-gradient: linear-gradient(135deg, #e8739e 0%, #7c5cbf 100%);
+  --accent-gradient-reverse: linear-gradient(135deg, #7c5cbf 0%, #e8739e 100%);
+
+  /* Result category colors */
+  --color-match: #4BB34B;
+  --color-soft-diff: #FF9500;
+  --color-dialogue: #5856D6;
+
+  /* Semantic */
+  --success-color: #4BB34B;
+  --warning-color: #FF9500;
+  --error-color: #E64646;
+
+  /* Backgrounds — use VKUI tokens for theme adaptivity */
+  --card-bg: var(--vkui--color_background_secondary, rgba(0, 0, 0, 0.04));
+  --card-bg-hover: var(--vkui--color_background_tertiary, rgba(0, 0, 0, 0.08));
+  --card-border: var(--vkui--color_separator_primary, rgba(0, 0, 0, 0.12));
+  --overlay-bg: rgba(0, 0, 0, 0.5);
+
+  /* === Spacing Scale === */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+  --space-3xl: 48px;
+
+  /* === Touch Targets === */
+  --touch-target-min: 44px;
+
+  /* === Border Radius === */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* === Typography === */
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 32px;
+
+  /* === Safe Areas === */
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+
+  /* VK Insets (set from JS via VKInsetsProvider) */
+  --vk-inset-top: 0px;
+  --vk-inset-bottom: 0px;
+  --vk-inset-left: 0px;
+  --vk-inset-right: 0px;
+
+  /* Effective insets */
+  --effective-inset-top: max(var(--safe-area-top), var(--vk-inset-top));
+  --effective-inset-bottom: max(var(--safe-area-bottom), var(--vk-inset-bottom));
+  --effective-inset-left: max(var(--safe-area-left), var(--vk-inset-left));
+  --effective-inset-right: max(var(--safe-area-right), var(--vk-inset-right));
+
+  /* === Shadows === */
+  --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-glow-pink: 0 0 20px rgba(232, 115, 158, 0.3);
+  --shadow-glow-purple: 0 0 20px rgba(124, 92, 191, 0.3);
+
+  /* === Transitions === */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.25s ease;
+  --transition-slow: 0.4s ease;
+}
+
+/* === Small Phones (< 360px) === */
+@media (max-width: 360px) {
+  :root {
+    --space-lg: 12px;
+    --space-xl: 20px;
+    --space-2xl: 24px;
+    --font-size-2xl: 22px;
+    --font-size-3xl: 28px;
+  }
+}
+
+/* === Tablets and Desktop (768px+) === */
+@media (min-width: 768px) {
+  :root {
+    --space-lg: 20px;
+    --space-xl: 28px;
+    --space-2xl: 40px;
+    --space-3xl: 56px;
+  }
+}

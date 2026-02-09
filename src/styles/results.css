@@ -1,0 +1,218 @@
+/**
+ * Results screen styles
+ */
+
+.results {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-lg);
+  padding-top: calc(var(--effective-inset-top) + var(--space-lg));
+  padding-bottom: calc(var(--effective-inset-bottom) + var(--space-lg));
+  box-sizing: border-box;
+}
+
+/* === Summary section === */
+
+.results-summary {
+  text-align: center;
+  margin-bottom: var(--space-2xl);
+  animation: fadeInUp 0.5s ease;
+}
+
+.results-summary__emoji {
+  font-size: 56px;
+  margin-bottom: var(--space-md);
+}
+
+.results-summary__title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  margin: 0 0 var(--space-md);
+}
+
+.results-summary__message {
+  font-size: var(--font-size-base);
+  opacity: 0.7;
+  margin: 0 0 var(--space-xl);
+  line-height: 1.5;
+}
+
+.results-summary__stats {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.stat-pill--match {
+  background: rgba(75, 179, 75, 0.15);
+  color: var(--color-match);
+}
+
+.stat-pill--soft-diff {
+  background: rgba(255, 149, 0, 0.15);
+  color: var(--color-soft-diff);
+}
+
+.stat-pill--dialogue {
+  background: rgba(88, 86, 214, 0.15);
+  color: var(--color-dialogue);
+}
+
+/* === Result cards === */
+
+.results-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-2xl);
+}
+
+.result-card {
+  background: var(--card-bg);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  border-left: 4px solid transparent;
+  animation: fadeInUp 0.4s ease both;
+}
+
+.result-card--match {
+  border-left-color: var(--color-match);
+}
+
+.result-card--soft_difference {
+  border-left-color: var(--color-soft-diff);
+}
+
+.result-card--dialogue_topic {
+  border-left-color: var(--color-dialogue);
+}
+
+.result-card__question {
+  font-size: var(--font-size-sm);
+  opacity: 0.6;
+  margin: 0 0 var(--space-md);
+}
+
+.result-card__answers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.result-card__answer {
+  padding: var(--space-md);
+  background: var(--vkui--color_background_secondary, rgba(0, 0, 0, 0.04));
+  border-radius: var(--radius-sm);
+}
+
+.result-card__player-label {
+  font-size: var(--font-size-xs);
+  opacity: 0.5;
+  margin: 0 0 var(--space-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.result-card__answer-text {
+  font-size: var(--font-size-base);
+  margin: 0;
+  line-height: 1.4;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Free-text answers: stack vertically on mobile */
+.result-card__answers--text {
+  grid-template-columns: 1fr;
+}
+
+.result-card__message {
+  font-size: var(--font-size-sm);
+  opacity: 0.7;
+  margin: 0;
+  line-height: 1.4;
+  font-style: italic;
+}
+
+/* Scale visual comparison */
+.result-card__scale {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.result-card__scale-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--card-border);
+  border-radius: var(--radius-full);
+  position: relative;
+}
+
+.result-card__scale-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.result-card__scale-dot--a {
+  background: var(--accent-primary);
+}
+
+.result-card__scale-dot--b {
+  background: var(--accent-secondary);
+}
+
+/* === Share section === */
+
+.share-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.share-section__title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  margin: 0 0 var(--space-sm);
+  text-align: center;
+}
+
+.share-section__buttons {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.share-section__buttons > * {
+  flex: 1;
+}
+
+.share-section__note {
+  font-size: var(--font-size-sm);
+  opacity: 0.5;
+  text-align: center;
+  margin: 0;
+}
+
+/* === Restart button === */
+
+.results__restart {
+  margin-top: var(--space-lg);
+}

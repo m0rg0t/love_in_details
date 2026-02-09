@@ -1,0 +1,50 @@
+/**
+ * Main stylesheet — imports all CSS files
+ * Import order matters for cascade
+ */
+
+@import './variables.css';
+@import './animations.css';
+@import './welcome.css';
+@import './quiz.css';
+@import './handoff.css';
+@import './results.css';
+
+/* Prevent scrollbar layout shift */
+html {
+  scrollbar-gutter: stable;
+}
+
+/* Base app styles */
+body {
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Gradient button reusable class */
+.gradient-button {
+  background: var(--accent-gradient);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-xl);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  cursor: pointer;
+  min-height: var(--touch-target-min);
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  width: 100%;
+}
+
+.gradient-button:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+.gradient-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}

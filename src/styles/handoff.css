@@ -1,0 +1,41 @@
+/**
+ * Handoff screen — "Pass the phone" styles
+ */
+
+.handoff {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--space-xl);
+  padding-top: var(--effective-inset-top);
+  padding-bottom: var(--effective-inset-bottom);
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.handoff__emoji {
+  font-size: 80px;
+  margin-bottom: var(--space-xl);
+  animation: float 3s ease-in-out infinite;
+}
+
+.handoff__title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  margin: 0 0 var(--space-md);
+}
+
+.handoff__subtitle {
+  font-size: var(--font-size-base);
+  opacity: 0.6;
+  margin: 0 0 var(--space-3xl);
+  max-width: 300px;
+  line-height: 1.5;
+}
+
+.handoff__button {
+  max-width: 360px;
+  animation: glowPulse 2s ease infinite;
+}
