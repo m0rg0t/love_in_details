@@ -10,7 +10,7 @@ export const ResultSummary: React.FC<ResultSummaryProps> = ({ stats }) => {
     <div className="results-summary">
       <div className="results-summary__emoji">💕</div>
       <h2 className="results-summary__title">
-        Вы совпали в {stats.matchCount} из {stats.totalQuestions} вопросов
+        Мы совпали в {stats.matchCount} из {stats.totalQuestions} вопросов
       </h2>
       <p className="results-summary__message">{stats.summaryMessage}</p>
 

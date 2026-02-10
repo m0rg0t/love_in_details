@@ -8,12 +8,12 @@ import type {
 import { questions } from '../data/questions';
 
 function getMessage(category: ComparisonCategory, questionType: Question['type']): string {
-  if (questionType === 'text') return 'Интересно сравнить ваши мысли';
+  if (questionType === 'text') return 'Интересно сравнить наши мысли';
   switch (category) {
     case 'match':
-      return 'У вас схожее понимание этого вопроса';
+      return 'У нас схожее понимание этого вопроса';
     case 'soft_difference':
-      return 'Вы смотрите на это немного по-разному — и это нормально';
+      return 'Мы смотрим на это немного по-разному — и это нормально';
     case 'dialogue_topic':
       return 'Хорошая тема, чтобы спокойно обсудить её вместе';
   }
@@ -45,11 +45,11 @@ export function computeStats(results: ComparisonResult[]): ComparisonStats {
 
   let summaryMessage: string;
   if (matchCount >= 8) {
-    summaryMessage = 'Вы во многом совпадаете! Отличная основа для понимания.';
+    summaryMessage = 'Мы во многом совпадаем! Отличная основа для понимания.';
   } else if (matchCount >= 5) {
-    summaryMessage = 'У вас хороший баланс совпадений и различий.';
+    summaryMessage = 'У нас хороший баланс совпадений и различий.';
   } else {
-    summaryMessage = 'У вас много тем для интересного разговора!';
+    summaryMessage = 'У нас много тем для интересного разговора!';
   }
 
   return { matchCount, softDiffCount, dialogueCount, totalQuestions, summaryMessage };
