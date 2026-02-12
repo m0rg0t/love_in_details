@@ -61,4 +61,11 @@
 
 .welcome__start-button {
   max-width: 360px;
+  margin-bottom: 0;
+}
+
+.welcome__otredach-button {
+  margin-top: var(--space-md);
+  width: 100%;
+  max-width: 360px;
 }

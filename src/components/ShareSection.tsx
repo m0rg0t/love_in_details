@@ -3,19 +3,16 @@ import bridge from '@vkontakte/vk-bridge';
 import { Button } from '@vkontakte/vkui';
 import { Icon24ShareOutline, Icon28StoryOutline, Icon24GiftOutline } from '@vkontakte/icons';
 import type { ComparisonStats } from '../types';
-import { isVKBridge } from '../utils/platform';
 import { generateStoryImage } from '../utils/storyCanvas';
-import { trackShare, trackOpenOtredach } from '../utils/analytics';
-
-const OTREDACH_APP_ID = 54160489;
-const VALENTINE_TAG = 'День святого Валентина';
+import { trackShare } from '../utils/analytics';
+import { useOtredach } from '../hooks/useOtredach';
 
 interface ShareSectionProps {
   stats: ComparisonStats;
 }
 
 export const ShareSection: React.FC<ShareSectionProps> = ({ stats }) => {
-  const isVK = isVKBridge();
+  const { openOtredach, isVK } = useOtredach();
 
   const handleShareStory = useCallback(async () => {
     try {
@@ -43,28 +40,6 @@ export const ShareSection: React.FC<ShareSectionProps> = ({ stats }) => {
     }
   }, []);
 
-  const handleOpenOtredach = useCallback(async () => {
-    const encodedTag = encodeURIComponent(VALENTINE_TAG);
-    const location = `all_templates?tag=${encodedTag}`;
-
-    try {
-      await bridge.send('VKWebAppOpenApp', {
-        app_id: OTREDACH_APP_ID,
-        location,
-      });
-      trackOpenOtredach(true);
-    } catch (err) {
-      console.error('[Share] Otredach error:', err);
-      trackOpenOtredach(false);
-
-      // Fallback для standalone режима
-      if (!isVKBridge()) {
-        const url = `https://vk.com/app${OTREDACH_APP_ID}#/${location}`;
-        window.open(url, '_blank');
-      }
-    }
-  }, []);
-
   return (
     <div className="share-section">
       <h3 className="share-section__title">Поделиться результатом</h3>
@@ -75,7 +50,7 @@ export const ShareSection: React.FC<ShareSectionProps> = ({ stats }) => {
             size="l"
             mode="outline"
             before={<Icon24GiftOutline />}
-            onClick={handleOpenOtredach}
+            onClick={openOtredach}
           >
             Создать открытку
           </Button>

@@ -1,5 +1,7 @@
 import React from 'react';
-import { Panel } from '@vkontakte/vkui';
+import { Panel, Button } from '@vkontakte/vkui';
+import { Icon24GiftOutline } from '@vkontakte/icons';
+import { useOtredach } from '../hooks/useOtredach';
 
 interface WelcomeScreenProps {
   id: string;
@@ -7,6 +9,8 @@ interface WelcomeScreenProps {
 }
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ id, onStart }) => {
+  const { openOtredach, isVK } = useOtredach();
+
   return (
     <Panel id={id}>
       <div className="welcome">
@@ -32,6 +36,18 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ id, onStart }) => 
         <button className="gradient-button welcome__start-button" onClick={onStart}>
           Начать
         </button>
+
+        {isVK && (
+          <Button
+            size="l"
+            mode="secondary"
+            before={<Icon24GiftOutline />}
+            onClick={openOtredach}
+            className="welcome__otredach-button"
+          >
+            Создать романтическое фото
+          </Button>
+        )}
       </div>
     </Panel>
   );
