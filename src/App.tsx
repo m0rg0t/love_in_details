@@ -46,8 +46,9 @@ const App: React.FC = () => {
   useEffect(() => {
     checkVKBridge().then(() => {
       trackAppStart(isVKBridge() ? 'vk' : 'standalone');
+      showBannerAd();
     });
-  }, []);
+  }, [showBannerAd]);
 
   // Debug mode: populate state with mock data for screenshots
   useEffect(() => {
@@ -94,9 +95,8 @@ const App: React.FC = () => {
   const handleStart = useCallback(() => {
     dispatch({ type: 'START_QUIZ' });
     pushPanel('quiz-a');
-    showBannerAd(); // Show banner ad when quiz starts
     trackQuizStart();
-  }, [dispatch, pushPanel, showBannerAd]);
+  }, [dispatch, pushPanel]);
 
   const handleAnswer = useCallback((questionId: string, answer: Answer) => {
     dispatch({ type: 'ANSWER_QUESTION', questionId, answer });
