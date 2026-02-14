@@ -244,6 +244,10 @@
   resize: vertical;
   box-sizing: border-box;
   transition: border-color var(--transition-fast);
+  touch-action: manipulation;
+  user-select: text;
+  -webkit-user-select: text;
+  -webkit-appearance: none;
 }
 
 .text-input:focus {
