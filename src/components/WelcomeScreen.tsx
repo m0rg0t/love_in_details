@@ -2,6 +2,7 @@ import React from 'react';
 import { Panel, Button } from '@vkontakte/vkui';
 import { Icon24GiftOutline } from '@vkontakte/icons';
 import { useOtredach } from '../hooks/useOtredach';
+import { ENABLE_OTREDACH } from '../config';
 
 interface WelcomeScreenProps {
   id: string;
@@ -37,7 +38,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ id, onStart }) => 
           Начать
         </button>
 
-        {isVK && (
+        {ENABLE_OTREDACH && isVK && (
           <Button
             size="l"
             mode="secondary"

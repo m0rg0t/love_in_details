@@ -6,6 +6,7 @@ import type { ComparisonStats } from '../types';
 import { generateStoryImage } from '../utils/storyCanvas';
 import { trackShare } from '../utils/analytics';
 import { useOtredach } from '../hooks/useOtredach';
+import { ENABLE_OTREDACH } from '../config';
 
 interface ShareSectionProps {
   stats: ComparisonStats;
@@ -46,14 +47,16 @@ export const ShareSection: React.FC<ShareSectionProps> = ({ stats }) => {
 
       {isVK ? (
         <div className="share-section__buttons">
-          <Button
-            size="l"
-            mode="outline"
-            before={<Icon24GiftOutline />}
-            onClick={openOtredach}
-          >
-            Создать открытку
-          </Button>
+          {ENABLE_OTREDACH && (
+            <Button
+              size="l"
+              mode="outline"
+              before={<Icon24GiftOutline />}
+              onClick={openOtredach}
+            >
+              Создать открытку
+            </Button>
+          )}
           <Button
             size="l"
             mode="outline"
@@ -73,7 +76,9 @@ export const ShareSection: React.FC<ShareSectionProps> = ({ stats }) => {
         </div>
       ) : (
         <p className="share-section__note">
-          Функции «Поделиться» и «Создать открытку» доступны при запуске внутри VK
+          {ENABLE_OTREDACH
+            ? 'Функции «Поделиться» и «Создать открытку» доступны при запуске внутри VK'
+            : 'Функция «Поделиться» доступна при запуске внутри VK'}
         </p>
       )}
     </div>
