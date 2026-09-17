@@ -7,10 +7,14 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  max-width: 560px;
   min-height: 100vh;
+  min-height: 100svh;
+  margin: 0 auto;
   padding: var(--space-xl);
-  padding-top: var(--effective-inset-top);
-  padding-bottom: var(--effective-inset-bottom);
+  padding-top: calc(var(--effective-inset-top) + var(--space-xl));
+  padding-bottom: calc(var(--effective-inset-bottom) + var(--space-xl));
   text-align: center;
   box-sizing: border-box;
 }
@@ -64,8 +68,22 @@
   margin-bottom: 0;
 }
 
-.welcome__otredach-button {
+.welcome__prompt-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
   margin-top: var(--space-md);
   width: 100%;
   max-width: 360px;
+}
+
+.welcome__prompts-button {
+  width: 100%;
+}
+
+.welcome__prompt-note {
+  color: var(--vkui--color_text_primary, #000);
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
 }

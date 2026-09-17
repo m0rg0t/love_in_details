@@ -94,7 +94,9 @@ export type QuizAction =
   | { type: 'START_QUIZ' }
   | { type: 'ANSWER_QUESTION'; questionId: string; answer: Answer }
   | { type: 'NEXT_QUESTION' }
+  | { type: 'PREVIOUS_QUESTION' }
   | { type: 'FINISH_PLAYER_A' }
   | { type: 'START_PLAYER_B' }
   | { type: 'FINISH_QUIZ'; results: ComparisonResult[]; stats: ComparisonStats }
+  | { type: 'NAVIGATE_TO_PANEL'; panel: PanelId }
   | { type: 'RESTART' };

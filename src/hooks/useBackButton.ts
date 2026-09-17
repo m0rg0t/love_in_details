@@ -20,8 +20,8 @@ export function useBackButton({
   }, [activePanel]);
 
   useEffect(() => {
-    if (!window.history.state?.panel) {
-      window.history.replaceState({ panel: defaultPanel }, '');
+    if (!window.history.state?.panel || typeof window.history.state?.appDepth !== 'number') {
+      window.history.replaceState({ panel: defaultPanel, appDepth: 0 }, '');
     }
   }, [defaultPanel]);
 
@@ -44,7 +44,8 @@ export function useBackButton({
   const pushPanel = useCallback(
     (panelId: PanelId) => {
       if (panelId !== defaultPanel) {
-        window.history.pushState({ panel: panelId }, '');
+        const currentDepth = Number(window.history.state?.appDepth) || 0;
+        window.history.pushState({ panel: panelId, appDepth: currentDepth + 1 }, '');
       }
     },
     [defaultPanel]
@@ -53,8 +54,9 @@ export function useBackButton({
   useEffect(() => {
     const historyPanel = window.history.state?.panel;
     if (activePanel === defaultPanel && historyPanel && historyPanel !== defaultPanel) {
+      const appDepth = Math.max(1, Number(window.history.state?.appDepth) || 1);
       isNavigatingRef.current = true;
-      window.history.back();
+      window.history.go(-appDepth);
     }
   }, [activePanel, defaultPanel]);
 

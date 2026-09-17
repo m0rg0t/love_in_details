@@ -1,5 +1,5 @@
 import React from 'react';
-import { Panel } from '@vkontakte/vkui';
+import { Button, Panel } from '@vkontakte/vkui';
 
 interface HandoffScreenProps {
   id: string;
@@ -15,9 +15,9 @@ export const HandoffScreen: React.FC<HandoffScreenProps> = ({ id, onReady }) => 
         <p className="handoff__subtitle">
           Ответы первого участника сохранены и скрыты до финального результата
         </p>
-        <button className="gradient-button handoff__button" onClick={onReady}>
+        <Button size="l" className="gradient-button handoff__button" onClick={onReady}>
           Готово, начинаем!
-        </button>
+        </Button>
       </div>
     </Panel>
   );

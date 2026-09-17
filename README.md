@@ -24,19 +24,27 @@
 
 ```bash
 npm install
-npm run dev      # https://localhost:10888
+npm run dev      # http://localhost:10888
 npm run build    # Сборка для продакшена
 npm run deploy   # Деплой в VK Hosting
 ```
 
 ## Технологии
 
-- **React 18** + **TypeScript** (strict mode)
-- **Vite 5** — сборка и dev-сервер
-- **VKUI 6.5** — UI-компоненты VK
+- **React 19** + **TypeScript** (strict mode)
+- **Vite 7** — сборка и dev-сервер
+- **VKUI 7** — UI-компоненты VK
 - **VK Bridge** — интеграция с VK платформой
 - **Vitest** + **React Testing Library** — тесты
 - **Puppeteer** — E2E тестирование
+
+## Промпты для фото пары
+
+На стартовом и итоговом экранах есть переход в приложение
+[«Промпты — новые образы»](https://vk.ru/app54717058). Интеграция открывает
+сразу выбранную идею для пары: «В стиле Love is…», «Неоновая любовь» или
+«Любовный кинопостер». Внутри VK используется `VKWebAppOpenApp`, в обычном
+браузере — тот же deep link в новой вкладке.
 
 ## Структура проекта
 

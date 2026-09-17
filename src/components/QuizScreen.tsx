@@ -1,5 +1,6 @@
 import React from 'react';
-import { Panel } from '@vkontakte/vkui';
+import { Button, Panel } from '@vkontakte/vkui';
+import { Icon24ChevronLeft } from '@vkontakte/icons';
 import type { Question, Answers, PlayerLabel, Answer } from '../types';
 import { ProgressBar } from './ProgressBar';
 import { QuestionSingle } from './QuestionSingle';
@@ -14,6 +15,7 @@ interface QuizScreenProps {
   answers: Answers;
   playerLabel: PlayerLabel;
   onAnswer: (questionId: string, answer: Answer) => void;
+  onPrevious: () => void;
   onNext: () => void;
 }
 
@@ -24,6 +26,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
   answers,
   playerLabel,
   onAnswer,
+  onPrevious,
   onNext,
 }) => {
   const question = questions[currentQuestion];
@@ -88,13 +91,25 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
         </div>
 
         <div className="quiz__footer">
-          <button
+          {currentQuestion > 0 && (
+            <Button
+              size="l"
+              mode="secondary"
+              before={<Icon24ChevronLeft />}
+              onClick={onPrevious}
+              className="quiz__previous-button"
+            >
+              Назад
+            </Button>
+          )}
+          <Button
+            size="l"
             className="gradient-button"
             onClick={onNext}
             disabled={!isAnswered}
           >
             {isLastQuestion ? 'Завершить' : 'Далее'}
-          </button>
+          </Button>
         </div>
       </div>
     </Panel>

@@ -1,27 +1,27 @@
-import React, { useCallback } from 'react';
-import bridge from '@vkontakte/vk-bridge';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Button } from '@vkontakte/vkui';
-import { Icon24ShareOutline, Icon28StoryOutline, Icon24GiftOutline } from '@vkontakte/icons';
+import { Icon24ShareOutline, Icon28StoryOutline } from '@vkontakte/icons';
 import type { ComparisonStats } from '../types';
 import { generateStoryImage } from '../utils/storyCanvas';
 import { trackShare } from '../utils/analytics';
-import { useOtredach } from '../hooks/useOtredach';
-import { ENABLE_OTREDACH } from '../config';
+import { vkBridgeService } from '../services/vkBridge';
+import { checkVKBridge, getAppLink, isVKBridge } from '../utils/platform';
 
 interface ShareSectionProps {
   stats: ComparisonStats;
 }
 
 export const ShareSection: React.FC<ShareSectionProps> = ({ stats }) => {
-  const { openOtredach, isVK } = useOtredach();
+  const [isVK, setIsVK] = useState(isVKBridge);
+
+  useEffect(() => {
+    void checkVKBridge().then(setIsVK);
+  }, []);
 
   const handleShareStory = useCallback(async () => {
     try {
       const blob = await generateStoryImage(stats);
-      await bridge.send('VKWebAppShowStoryBox', {
-        background_type: 'image',
-        blob,
-      });
+      await vkBridgeService.showStory(blob);
       trackShare('story', true);
     } catch (err) {
       console.error('[Share] Story error:', err);
@@ -31,9 +31,7 @@ export const ShareSection: React.FC<ShareSectionProps> = ({ stats }) => {
 
   const handleShareWall = useCallback(async () => {
     try {
-      await bridge.send('VKWebAppShare', {
-        link: `https://vk.com/app54445864`,
-      });
+      await vkBridgeService.shareApp(getAppLink());
       trackShare('wall', true);
     } catch (err) {
       console.error('[Share] Wall error:', err);
@@ -42,24 +40,18 @@ export const ShareSection: React.FC<ShareSectionProps> = ({ stats }) => {
   }, []);
 
   return (
-    <div className="share-section">
-      <h3 className="share-section__title">Поделиться результатом</h3>
+    <section className="share-section" aria-labelledby="share-section-title">
+      <div className="share-section__copy">
+        <span className="results-section__eyebrow">Сохраните этот момент</span>
+        <h2 id="share-section-title" className="share-section__title">Ваш портрет готов для истории</h2>
+        <p>Соберём вертикальную карточку с главным выводом и результатами пары.</p>
+      </div>
 
       {isVK ? (
         <div className="share-section__buttons">
-          {ENABLE_OTREDACH && (
-            <Button
-              size="l"
-              mode="outline"
-              before={<Icon24GiftOutline />}
-              onClick={openOtredach}
-            >
-              Создать открытку
-            </Button>
-          )}
           <Button
             size="l"
-            mode="outline"
+            className="gradient-button share-section__story-button"
             before={<Icon28StoryOutline />}
             onClick={handleShareStory}
           >
@@ -76,11 +68,9 @@ export const ShareSection: React.FC<ShareSectionProps> = ({ stats }) => {
         </div>
       ) : (
         <p className="share-section__note">
-          {ENABLE_OTREDACH
-            ? 'Функции «Поделиться» и «Создать открытку» доступны при запуске внутри VK'
-            : 'Функция «Поделиться» доступна при запуске внутри VK'}
+          Функция «Поделиться» доступна при запуске внутри VK
         </p>
       )}
-    </div>
+    </section>
   );
 };

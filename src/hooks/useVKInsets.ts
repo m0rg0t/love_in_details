@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import bridge, { VKBridgeSubscribeHandler } from '@vkontakte/vk-bridge';
+import type { VKBridgeSubscribeHandler } from '@vkontakte/vk-bridge';
 import { isVKBridge, checkVKBridge } from '../utils/platform';
+import { vkBridgeService } from '../services/vkBridge';
 
 export interface VKInsets {
   top: number;
@@ -43,17 +44,17 @@ export function useVKInsets(): VKInsets {
         }
       };
 
-      bridge.subscribe(handleEvent);
+      vkBridgeService.subscribe(handleEvent);
 
       try {
-        const config = await bridge.send('VKWebAppGetConfig');
+        const config = await vkBridgeService.getConfig();
         const configWithInsets = config as { insets?: VKInsets };
         if (mounted && configWithInsets.insets) handleInsets(configWithInsets.insets);
       } catch (error) {
         console.warn('[useVKInsets] Failed to get initial config:', error);
       }
 
-      return () => { bridge.unsubscribe(handleEvent); };
+      return () => { vkBridgeService.unsubscribe(handleEvent); };
     }
 
     const cleanup = init();

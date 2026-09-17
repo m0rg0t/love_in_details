@@ -5,7 +5,11 @@
 .quiz {
   display: flex;
   flex-direction: column;
+  width: 100%;
+  max-width: 720px;
   min-height: 100vh;
+  min-height: 100svh;
+  margin: 0 auto;
   padding: var(--space-lg);
   padding-top: calc(var(--effective-inset-top) + var(--space-lg));
   padding-bottom: calc(var(--effective-inset-bottom) + var(--space-lg));
@@ -38,8 +42,21 @@
 }
 
 .quiz__footer {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-md);
   margin-top: auto;
   padding-top: var(--space-xl);
+}
+
+.quiz__footer .gradient-button {
+  flex: 1;
+  width: auto;
+}
+
+.quiz__previous-button {
+  flex: 0 0 auto;
+  min-width: 116px;
 }
 
 /* === Progress bar === */
@@ -86,6 +103,10 @@
   min-height: var(--touch-target-min);
   transition: border-color var(--transition-fast), background var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
+  width: 100%;
+  color: inherit;
+  font: inherit;
+  text-align: left;
 }
 
 .option-card:active {
@@ -151,6 +172,9 @@
   z-index: 1;
   transition: border-color var(--transition-fast), background var(--transition-fast), transform var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
+  padding: 0;
+  color: inherit;
+  font-family: inherit;
 }
 
 .scale-selector__point:active {
@@ -199,6 +223,8 @@
   min-height: 100px;
   transition: border-color var(--transition-fast), background var(--transition-fast), transform var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
+  color: inherit;
+  font: inherit;
 }
 
 .binary-card:active {

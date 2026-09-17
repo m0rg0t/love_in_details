@@ -9,20 +9,19 @@ interface QuestionSingleProps {
 
 export const QuestionSingle: React.FC<QuestionSingleProps> = ({ question, value, onChange }) => {
   return (
-    <div className="options-list">
+    <div className="options-list" role="radiogroup" aria-label={question.text}>
       {question.options.map((option) => (
-        <div
+        <button
+          type="button"
           key={option.value}
           className={`option-card ${value === option.value ? 'option-card--selected' : ''}`}
           onClick={() => onChange(option.value)}
           role="radio"
           aria-checked={value === option.value}
-          tabIndex={0}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onChange(option.value); } }}
         >
-          {option.emoji && <span className="option-card__emoji">{option.emoji}</span>}
+          {option.emoji && <span className="option-card__emoji" aria-hidden="true">{option.emoji}</span>}
           <span className="option-card__label">{option.label}</span>
-        </div>
+        </button>
       ))}
     </div>
   );

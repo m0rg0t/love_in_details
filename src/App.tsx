@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import {
   ConfigProvider,
   AdaptivityProvider,
@@ -22,7 +22,7 @@ import { useVKAds } from './hooks/useVKAds';
 import { questions } from './data/questions';
 import { compareAnswers } from './utils/comparison';
 import { trackAppStart, trackQuizStart, trackPlayerSwitch, trackQuizComplete, trackRestart } from './utils/analytics';
-import { checkVKBridge, isVKBridge } from './utils/platform';
+import { checkVKBridge } from './utils/platform';
 import { isDebugMode, getDebugPanel, getDebugState } from './utils/debugMode';
 import type { PanelId, Answer } from './types';
 
@@ -30,11 +30,14 @@ const App: React.FC = () => {
   const appearance = useAppearance();
   const { state, dispatch } = useQuizState();
   const { showInterstitialAd, showBannerAd, hideBannerAd } = useVKAds();
+  const startupHandledRef = useRef(false);
 
   const setActivePanel = useCallback((panel: PanelId) => {
     if (panel === 'welcome') {
       dispatch({ type: 'RESTART' });
+      return;
     }
+    dispatch({ type: 'NAVIGATE_TO_PANEL', panel });
   }, [dispatch]);
 
   const { pushPanel } = useBackButton({
@@ -44,9 +47,12 @@ const App: React.FC = () => {
   });
 
   useEffect(() => {
-    checkVKBridge().then(() => {
-      trackAppStart(isVKBridge() ? 'vk' : 'standalone');
-      showBannerAd();
+    if (startupHandledRef.current) return;
+    startupHandledRef.current = true;
+
+    void checkVKBridge().then((isVK) => {
+      trackAppStart(isVK ? 'vk' : 'standalone');
+      if (isVK) void showBannerAd();
     });
   }, [showBannerAd]);
 
@@ -120,6 +126,10 @@ const App: React.FC = () => {
     }
   }, [state.currentQuestion, state.playerLabel, state.answersA, state.answersB, dispatch, pushPanel, showInterstitialAd]);
 
+  const handlePrevious = useCallback(() => {
+    dispatch({ type: 'PREVIOUS_QUESTION' });
+  }, [dispatch]);
+
   const handleHandoffReady = useCallback(() => {
     dispatch({ type: 'START_PLAYER_B' });
     pushPanel('quiz-b');
@@ -155,6 +165,7 @@ const App: React.FC = () => {
                     answers={currentAnswers}
                     playerLabel={state.playerLabel}
                     onAnswer={handleAnswer}
+                    onPrevious={handlePrevious}
                     onNext={handleNext}
                   />
                   <HandoffScreen id="handoff" onReady={handleHandoffReady} />
@@ -165,14 +176,13 @@ const App: React.FC = () => {
                     answers={currentAnswers}
                     playerLabel={state.playerLabel}
                     onAnswer={handleAnswer}
+                    onPrevious={handlePrevious}
                     onNext={handleNext}
                   />
                   <ResultsScreen
                     id="results"
                     results={state.results}
                     stats={state.stats}
-                    answersA={state.answersA}
-                    answersB={state.answersB}
                     questions={questions}
                     onRestart={handleRestart}
                   />

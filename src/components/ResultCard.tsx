@@ -1,21 +1,11 @@
 import React from 'react';
-import type { ComparisonResult, Question, Answer } from '../types';
+import type { ComparisonResult, Question } from '../types';
+import { formatAnswer } from '../utils/answers';
 
 interface ResultCardProps {
   result: ComparisonResult;
   question: Question;
   index: number;
-}
-
-function getAnswerDisplay(question: Question, answer: Answer): string {
-  if (question.type === 'single' || question.type === 'binary') {
-    const option = question.options.find((o) => o.value === answer);
-    return option ? `${option.emoji ?? ''} ${option.label}`.trim() : String(answer);
-  }
-  if (question.type === 'scale') {
-    return String(answer);
-  }
-  return String(answer);
 }
 
 export const ResultCard: React.FC<ResultCardProps> = ({ result, question, index }) => {
@@ -29,18 +19,22 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, question, index 
       <p className="result-card__question">{question.text}</p>
 
       {isScale && question.type === 'scale' ? (
-        <div className="result-card__scale">
+        <div
+          className="result-card__scale"
+          role="img"
+          aria-label={`Участник 1: ${result.answerA}. Участник 2: ${result.answerB}`}
+        >
           <span style={{ fontSize: '12px', opacity: 0.5 }}>{question.minLabel}</span>
           <div className="result-card__scale-bar">
             <div
               className="result-card__scale-dot result-card__scale-dot--a"
               style={{ left: `${((Number(result.answerA) - question.min) / (question.max - question.min)) * 100}%` }}
-              title={`Участник 1: ${result.answerA}`}
+              aria-hidden="true"
             />
             <div
               className="result-card__scale-dot result-card__scale-dot--b"
               style={{ left: `${((Number(result.answerB) - question.min) / (question.max - question.min)) * 100}%` }}
-              title={`Участник 2: ${result.answerB}`}
+              aria-hidden="true"
             />
           </div>
           <span style={{ fontSize: '12px', opacity: 0.5 }}>{question.maxLabel}</span>
@@ -50,13 +44,13 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, question, index 
           <div className="result-card__answer">
             <p className="result-card__player-label">Участник 1</p>
             <p className="result-card__answer-text">
-              {getAnswerDisplay(question, result.answerA)}
+              {formatAnswer(question, result.answerA)}
             </p>
           </div>
           <div className="result-card__answer">
             <p className="result-card__player-label">Участник 2</p>
             <p className="result-card__answer-text">
-              {getAnswerDisplay(question, result.answerB)}
+              {formatAnswer(question, result.answerB)}
             </p>
           </div>
         </div>

@@ -1,8 +1,8 @@
 import React from 'react';
 import { Panel, Button } from '@vkontakte/vkui';
-import { Icon24GiftOutline } from '@vkontakte/icons';
-import { useOtredach } from '../hooks/useOtredach';
-import { ENABLE_OTREDACH } from '../config';
+import { Icon24MagicWandOutline } from '@vkontakte/icons';
+import { useImagePrompts } from '../hooks/useImagePrompts';
+import { DEFAULT_COUPLE_PROMPT_ID } from '../utils/imagePrompts';
 
 interface WelcomeScreenProps {
   id: string;
@@ -10,7 +10,7 @@ interface WelcomeScreenProps {
 }
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ id, onStart }) => {
-  const { openOtredach, isVK } = useOtredach();
+  const { openImagePrompt } = useImagePrompts();
 
   return (
     <Panel id={id}>
@@ -34,21 +34,26 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ id, onStart }) => 
           </div>
         </div>
 
-        <button className="gradient-button welcome__start-button" onClick={onStart}>
+        <Button
+          size="l"
+          className="gradient-button welcome__start-button"
+          onClick={onStart}
+        >
           Начать
-        </button>
+        </Button>
 
-        {ENABLE_OTREDACH && isVK && (
+        <div className="welcome__prompt-link">
           <Button
-            size="l"
+            size="m"
             mode="secondary"
-            before={<Icon24GiftOutline />}
-            onClick={openOtredach}
-            className="welcome__otredach-button"
+            before={<Icon24MagicWandOutline />}
+            onClick={() => void openImagePrompt(DEFAULT_COUPLE_PROMPT_ID, 'welcome')}
+            className="welcome__prompts-button"
           >
-            Создать романтическое фото
+            Идеи для фото вдвоём
           </Button>
-        )}
+          <span className="welcome__prompt-note">Love is…, кино и яркие стили</span>
+        </div>
       </div>
     </Panel>
   );

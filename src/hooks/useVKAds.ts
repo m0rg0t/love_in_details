@@ -1,10 +1,6 @@
 import { useState, useCallback } from 'react';
-import bridge, {
-  BannerAdLayoutType,
-  BannerAdLocation,
-  EAdsFormats,
-} from '@vkontakte/vk-bridge';
 import { isVKBridge, checkVKBridge } from '../utils/platform';
+import { vkBridgeService } from '../services/vkBridge';
 
 export function useVKAds() {
   const [bannerVisible, setBannerVisible] = useState(false);
@@ -13,9 +9,7 @@ export function useVKAds() {
     await checkVKBridge();
     if (!isVKBridge()) return false;
     try {
-      const result = await bridge.send('VKWebAppShowNativeAds', {
-        ad_format: EAdsFormats.INTERSTITIAL,
-      });
+      const result = await vkBridgeService.showInterstitialAd();
       return result.result;
     } catch (err) {
       console.error('[Ads] Interstitial error:', err);
@@ -27,10 +21,7 @@ export function useVKAds() {
     await checkVKBridge();
     if (!isVKBridge()) return false;
     try {
-      const result = await bridge.send('VKWebAppShowBannerAd', {
-        banner_location: BannerAdLocation.BOTTOM,
-        layout_type: BannerAdLayoutType.RESIZE,
-      });
+      const result = await vkBridgeService.showBannerAd();
       if (result.result) {
         setBannerVisible(true);
         return true;
@@ -43,8 +34,9 @@ export function useVKAds() {
   }, []);
 
   const hideBannerAd = useCallback(async (): Promise<boolean> => {
+    if (!isVKBridge()) return false;
     try {
-      await bridge.send('VKWebAppHideBannerAd');
+      await vkBridgeService.hideBannerAd();
       setBannerVisible(false);
       return true;
     } catch (err) {

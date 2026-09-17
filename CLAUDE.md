@@ -4,7 +4,7 @@
 VK Mini App «Любовь в деталях» — парный квиз для двоих (Hot Seat формат).
 Два участника по очереди отвечают на 12 вопросов на одном устройстве, затем видят сравнение ответов.
 
-**Tech Stack:** React 18 + TypeScript + Vite 5 + VKUI 6.x + VK Bridge
+**Tech Stack:** React 19 + TypeScript + Vite 7 + VKUI 7.x + VK Bridge
 
 ## Key Commands
 ```bash

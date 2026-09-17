@@ -10,32 +10,49 @@
 @import './handoff.css';
 @import './results.css';
 
-/* Prevent scrollbar layout shift */
-html {
-  scrollbar-gutter: stable;
+/* Prevent desktop scrollbar layout shift without stealing mobile width. */
+@media (min-width: 768px) {
+  html {
+    scrollbar-gutter: stable;
+  }
 }
 
 /* Base app styles */
 body {
   margin: 0;
   padding: 0;
+  background: var(--vkui--color_background_content, #fff);
+  color: var(--vkui--color_text_primary, #000);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
 /* Gradient button reusable class */
 .gradient-button {
-  background: var(--accent-gradient);
-  color: #fff;
+  background: var(--accent-gradient) !important;
+  color: #fff !important;
   border: none;
   border-radius: var(--radius-md);
-  padding: var(--space-md) var(--space-xl);
+  padding: 0 var(--space-xl);
   font-size: var(--font-size-lg);
   font-weight: 600;
   cursor: pointer;
   min-height: var(--touch-target-min);
   transition: opacity var(--transition-fast), transform var(--transition-fast);
   width: 100%;
+  box-sizing: border-box;
 }
 
 .gradient-button:active {
@@ -47,4 +64,12 @@ body {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
+}
+
+.gradient-button:focus-visible,
+.option-card:focus-visible,
+.binary-card:focus-visible,
+.scale-selector__point:focus-visible {
+  outline: 3px solid var(--vkui--color_stroke_accent, #447bba);
+  outline-offset: 2px;
 }

@@ -14,21 +14,20 @@ export const QuestionScale: React.FC<QuestionScaleProps> = ({ question, value, o
   );
 
   return (
-    <div className="scale-selector">
+    <div className="scale-selector" role="radiogroup" aria-label={question.text}>
       <div className="scale-selector__track">
         {points.map((point) => (
-          <div
+          <button
+            type="button"
             key={point}
             className={`scale-selector__point ${value === point ? 'scale-selector__point--selected' : ''}`}
             onClick={() => onChange(point)}
             role="radio"
             aria-checked={value === point}
-            aria-label={`${point}`}
-            tabIndex={0}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onChange(point); } }}
+            aria-label={`${point} из ${question.max}`}
           >
             {point}
-          </div>
+          </button>
         ))}
       </div>
       <div className="scale-selector__labels">

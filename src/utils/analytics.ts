@@ -12,6 +12,8 @@ function bool(value: boolean): number {
   return value ? 1 : 0;
 }
 
+export type PromptOpenSource = 'welcome' | 'results';
+
 export function trackAppStart(mode: 'vk' | 'standalone') {
   track('app_start', { mode });
 }
@@ -44,6 +46,14 @@ export function trackRestart() {
   track('restart');
 }
 
-export function trackOpenOtredach(success: boolean) {
-  track('open_otredach', { success: bool(success) });
+export function trackOpenImagePrompts(
+  promptId: string,
+  source: PromptOpenSource,
+  success: boolean,
+) {
+  track('open_image_prompts', {
+    prompt_id: promptId,
+    source,
+    success: bool(success),
+  });
 }

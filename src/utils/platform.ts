@@ -1,27 +1,18 @@
-import bridge from '@vkontakte/vk-bridge';
+import { initializeVKBridge, isVKBridgeAvailable } from '../services/vkBridge';
 
-let _isVKBridge: boolean | null = null;
+let didLogMode = false;
 
 export async function checkVKBridge(): Promise<boolean> {
-  if (_isVKBridge !== null) return _isVKBridge;
-  try {
-    const timeout = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('timeout')), 1000)
-    );
-    await Promise.race([
-      bridge.send('VKWebAppGetClientVersion'),
-      timeout,
-    ]);
-    _isVKBridge = true;
-  } catch {
-    _isVKBridge = false;
+  const isVK = await initializeVKBridge();
+  if (!didLogMode) {
+    console.log(`[Platform] Mode: ${isVK ? 'VK Bridge' : 'Standalone'}`);
+    didLogMode = true;
   }
-  console.log(`[Platform] Mode: ${_isVKBridge ? 'VK Bridge' : 'Standalone'}`);
-  return _isVKBridge;
+  return isVK;
 }
 
 export function isVKBridge(): boolean {
-  return _isVKBridge ?? false;
+  return isVKBridgeAvailable();
 }
 
 export const APP_ID = 54445864;
