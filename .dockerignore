@@ -1,0 +1,13 @@
+.git
+.github
+.DS_Store
+.cache
+.temp
+coverage
+dist
+dogfood-output
+node_modules
+npm-debug.log*
+release
+screenshots/output
+*.tsbuildinfo

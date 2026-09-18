@@ -1,6 +1,6 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
-import path from 'path';
+import path from 'node:path';
 
 /**
  * Plugin to strip "use client" directives from @vkontakte/icons.
@@ -46,12 +46,12 @@ export default defineConfig({
 
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'),
-      '@components': path.resolve(__dirname, 'src/components'),
-      '@hooks': path.resolve(__dirname, 'src/hooks'),
-      '@types': path.resolve(__dirname, 'src/types'),
-      '@data': path.resolve(__dirname, 'src/data'),
-      '@utils': path.resolve(__dirname, 'src/utils'),
+      '@': path.resolve(import.meta.dirname, 'src'),
+      '@components': path.resolve(import.meta.dirname, 'src/components'),
+      '@hooks': path.resolve(import.meta.dirname, 'src/hooks'),
+      '@types': path.resolve(import.meta.dirname, 'src/types'),
+      '@data': path.resolve(import.meta.dirname, 'src/data'),
+      '@utils': path.resolve(import.meta.dirname, 'src/utils'),
     },
   },
 

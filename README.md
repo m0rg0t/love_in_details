@@ -32,11 +32,23 @@ npm run deploy   # Деплой в VK Hosting
 ## Технологии
 
 - **React 19** + **TypeScript** (strict mode)
-- **Vite 7** — сборка и dev-сервер
-- **VKUI 7** — UI-компоненты VK
-- **VK Bridge** — интеграция с VK платформой
+- **Vite 8** — сборка и dev-сервер
+- **VKUI 8** — UI-компоненты VK
+- **VK Bridge 3** — интеграция с VK платформой
 - **Vitest** + **React Testing Library** — тесты
 - **Puppeteer** — E2E тестирование
+
+## Деплой и резерв
+
+Основной внешний контур разворачивается в Coolify из `main`:
+<https://love-in-details.pixel-and-byte.ru>. Проект собирается через корневой
+`Dockerfile`, раздаётся Nginx на порту 80 и предоставляет healthcheck
+`/healthz`.
+
+VK Hosting остаётся независимым резервным контуром. Его конфигурация хранится в
+`vk-hosting-config.json`, а команда `npm run deploy` не зависит от Coolify.
+Порядок настройки, проверки и отката описан в
+[`docs/deployment.md`](docs/deployment.md).
 
 ## Промпты для фото пары
 

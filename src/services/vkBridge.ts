@@ -1,9 +1,4 @@
-import bridge, {
-  BannerAdLayoutType,
-  BannerAdLocation,
-  EAdsFormats,
-  type VKBridgeSubscribeHandler,
-} from '@vkontakte/vk-bridge';
+import bridge, { type VKBridgeSubscribeHandler } from '@vkontakte/vk-bridge';
 
 const INIT_TIMEOUT_MS = 3000;
 
@@ -47,12 +42,12 @@ export const vkBridgeService = {
   isAvailable: isVKBridgeAvailable,
 
   showInterstitialAd: () => bridge.send('VKWebAppShowNativeAds', {
-    ad_format: EAdsFormats.INTERSTITIAL,
+    ad_format: 'interstitial',
   }),
 
   showBannerAd: () => bridge.send('VKWebAppShowBannerAd', {
-    banner_location: BannerAdLocation.BOTTOM,
-    layout_type: BannerAdLayoutType.RESIZE,
+    banner_location: 'bottom',
+    layout_type: 'resize',
   }),
 
   hideBannerAd: () => bridge.send('VKWebAppHideBannerAd'),
