@@ -599,6 +599,9 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-md);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .prompt-idea {
@@ -648,24 +651,6 @@
 
 .prompt-idea__preview--cinema .prompt-idea__image {
   object-position: 50% 44%;
-}
-
-.prompt-idea__mark {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  border-radius: 12px;
-  background: rgba(23, 15, 38, 0.46);
-  box-shadow: 0 6px 20px rgba(17, 10, 28, 0.24);
-  font-size: 20px;
-  backdrop-filter: blur(8px);
-  z-index: 1;
 }
 
 .prompt-idea__body {
