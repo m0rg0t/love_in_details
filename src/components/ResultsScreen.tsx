@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Button, Panel, Spinner } from '@vkontakte/vkui';
 import { Icon24ChevronDown, Icon24ChevronUp } from '@vkontakte/icons';
 import type { ComparisonResult, ComparisonStats, Question } from '../types';
@@ -15,6 +15,19 @@ interface ResultsScreenProps {
   stats: ComparisonStats | null;
   questions: Question[];
   onRestart: () => void;
+  onRevealDetails?: () => Promise<unknown>;
+}
+
+function getAnswersHeading(count: number): string {
+  if (count === 1) return 'Ответ на вопрос';
+  const modulo100 = count % 100;
+  const modulo10 = count % 10;
+  const form = modulo100 >= 11 && modulo100 <= 19
+    ? 'ответов'
+    : modulo10 >= 2 && modulo10 <= 4
+      ? 'ответа'
+      : 'ответов';
+  return `Все ${count} ${form}`;
 }
 
 export const ResultsScreen: React.FC<ResultsScreenProps> = ({
@@ -23,8 +36,39 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
   stats,
   questions,
   onRestart,
+  onRevealDetails,
 }) => {
   const [showDetails, setShowDetails] = useState(false);
+  const [isRevealingDetails, setIsRevealingDetails] = useState(false);
+  const adAttemptedRef = useRef(false);
+  const revealPendingRef = useRef(false);
+
+  const handleDetailsToggle = useCallback(async () => {
+    if (showDetails) {
+      setShowDetails(false);
+      return;
+    }
+
+    if (revealPendingRef.current || isRevealingDetails) return;
+
+    if (!adAttemptedRef.current && onRevealDetails) {
+      adAttemptedRef.current = true;
+      revealPendingRef.current = true;
+      setIsRevealingDetails(true);
+      try {
+        await onRevealDetails();
+      } catch {
+        // Ads are optional: detailed answers must remain available on failure.
+      } finally {
+        revealPendingRef.current = false;
+        setIsRevealingDetails(false);
+        setShowDetails(true);
+      }
+      return;
+    }
+
+    setShowDetails(true);
+  }, [isRevealingDetails, onRevealDetails, showDetails]);
 
   if (!results || !stats) {
     return (
@@ -50,7 +94,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
         <section className="results-details" aria-labelledby="results-details-title">
           <div className="results-section__heading results-details__heading">
             <span className="results-section__eyebrow">Подробный разбор</span>
-            <h2 id="results-details-title">Все {stats.totalQuestions} ответов</h2>
+            <h2 id="results-details-title">{getAnswersHeading(stats.totalQuestions)}</h2>
             <p>Откройте, чтобы спокойно пройтись по каждому вопросу вместе.</p>
           </div>
 
@@ -61,9 +105,15 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
             aria-expanded={showDetails}
             aria-controls="results-details-list"
             after={showDetails ? <Icon24ChevronUp /> : <Icon24ChevronDown />}
-            onClick={() => setShowDetails((visible) => !visible)}
+            loading={isRevealingDetails}
+            disabled={isRevealingDetails}
+            onClick={() => void handleDetailsToggle()}
           >
-            {showDetails ? 'Скрыть подробности' : 'Показать все ответы'}
+            {isRevealingDetails
+              ? 'Открываем ответы…'
+              : showDetails
+                ? 'Скрыть подробности'
+                : 'Показать все ответы'}
           </Button>
 
           {showDetails && (

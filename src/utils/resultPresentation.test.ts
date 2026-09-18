@@ -56,4 +56,17 @@ describe('result presentation', () => {
 
     expect(support?.state).toBe('shared');
   });
+
+  it('omits topics that were not part of a compact quiz', () => {
+    const compactQuestions = questions.filter((question) =>
+      ['support-comfort', 'comm-conflict', 'time-evening'].includes(question.id),
+    );
+    const compactResults = compactQuestions.map((question) => makeResult(question.id, 'match'));
+
+    expect(getBlockPortrait(compactResults, compactQuestions).map((item) => item.block)).toEqual([
+      'support',
+      'communication',
+      'time',
+    ]);
+  });
 });

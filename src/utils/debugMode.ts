@@ -63,6 +63,8 @@ export function getDebugState(): QuizState {
     answersA: mockAnswersA,
     answersB: mockAnswersB,
     playerLabel: 'A', // Doesn't matter for results screen
+    mode: 'full',
+    questionIds: [],
     results: mockResults,
     stats: mockStats,
   };

@@ -1,3 +1,5 @@
+import type { PanelId, QuizMode } from '../types';
+
 declare global {
   interface Window {
     umami?: { track: (event: string, data?: Record<string, string | number>) => void };
@@ -14,12 +16,16 @@ function bool(value: boolean): number {
 
 export type PromptOpenSource = 'welcome' | 'results';
 
-export function trackAppStart(mode: 'vk' | 'standalone') {
-  track('app_start', { mode });
+export function trackAppStart(mode: 'vk' | 'standalone', hasSavedProgress = false) {
+  track('app_start', { mode, has_saved_progress: bool(hasSavedProgress) });
 }
 
-export function trackQuizStart() {
-  track('quiz_start');
+export function trackQuizStart(quizMode: QuizMode) {
+  track('quiz_start', { quiz_mode: quizMode });
+}
+
+export function trackQuizResume(quizMode: QuizMode, panel: PanelId) {
+  track('quiz_resume', { quiz_mode: quizMode, panel });
 }
 
 export function trackQuestionAnswer(questionId: string, questionNumber: number) {
@@ -30,8 +36,12 @@ export function trackPlayerSwitch() {
   track('player_switch');
 }
 
-export function trackQuizComplete(matchCount: number, totalQuestions: number) {
-  track('quiz_complete', { match_count: matchCount, total_questions: totalQuestions });
+export function trackQuizComplete(matchCount: number, totalQuestions: number, quizMode: QuizMode) {
+  track('quiz_complete', {
+    match_count: matchCount,
+    total_questions: totalQuestions,
+    quiz_mode: quizMode,
+  });
 }
 
 export function trackShare(method: 'story' | 'wall', success: boolean) {
@@ -42,8 +52,8 @@ export function trackAdShow(format: 'interstitial' | 'banner', success: boolean)
   track('ad_show', { format, success: bool(success) });
 }
 
-export function trackRestart() {
-  track('restart');
+export function trackRestart(quizMode: QuizMode) {
+  track('restart', { quiz_mode: quizMode });
 }
 
 export function trackOpenImagePrompts(

@@ -8,6 +8,8 @@ const quizState: QuizState = {
   answersA: { first: 'answer' },
   answersB: {},
   playerLabel: 'A',
+  mode: 'full',
+  questionIds: ['first', 'second', 'third', 'fourth', 'fifth'],
   results: null,
   stats: null,
 };
@@ -39,5 +41,32 @@ describe('quizReducer navigation', () => {
       playerLabel: 'A',
       answersA: quizState.answersA,
     });
+  });
+
+  it('clears stale result data when reopening the last quiz question', () => {
+    const nextState = quizReducer(
+      {
+        ...quizState,
+        panel: 'results',
+        playerLabel: 'B',
+        results: [{
+          questionId: 'fifth',
+          category: 'match',
+          answerA: 'yes',
+          answerB: 'yes',
+          message: 'match',
+        }],
+        stats: {
+          matchCount: 1,
+          softDiffCount: 0,
+          dialogueCount: 0,
+          totalQuestions: 1,
+          summaryMessage: 'match',
+        },
+      },
+      { type: 'NAVIGATE_TO_PANEL', panel: 'quiz-b' },
+    );
+
+    expect(nextState).toMatchObject({ panel: 'quiz-b', results: null, stats: null });
   });
 });

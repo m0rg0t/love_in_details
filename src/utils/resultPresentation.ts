@@ -92,7 +92,9 @@ export function getBlockPortrait(
   results: ComparisonResult[],
   questions: Question[],
 ): BlockPortrait[] {
-  return BLOCK_ORDER.map((block) => {
+  const representedBlocks = new Set(questions.map((question) => question.block));
+
+  return BLOCK_ORDER.filter((block) => representedBlocks.has(block)).map((block) => {
     // Free-text responses are invitations to compare thoughts, not a reliable
     // similarity signal, so the portrait uses only comparable answer types.
     const comparableQuestionIds = questions

@@ -20,9 +20,10 @@ export function useBackButton({
   }, [activePanel]);
 
   useEffect(() => {
-    if (!window.history.state?.panel || typeof window.history.state?.appDepth !== 'number') {
-      window.history.replaceState({ panel: defaultPanel, appDepth: 0 }, '');
-    }
+    // A document reload recreates React state from the welcome panel while the
+    // browser may still carry a deeper in-app entry. Normalize that stale entry
+    // so the return-to-welcome effect never navigates outside the Mini App.
+    window.history.replaceState({ panel: defaultPanel, appDepth: 0 }, '');
   }, [defaultPanel]);
 
   useEffect(() => {

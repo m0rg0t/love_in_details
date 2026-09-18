@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Panel } from '@vkontakte/vkui';
 import { Icon24ChevronLeft } from '@vkontakte/icons';
-import type { Question, Answers, PlayerLabel, Answer } from '../types';
+import type { Question, Answers, PlayerLabel, Answer, QuizMode } from '../types';
 import { ProgressBar } from './ProgressBar';
 import { QuestionSingle } from './QuestionSingle';
 import { QuestionScale } from './QuestionScale';
@@ -14,6 +14,7 @@ interface QuizScreenProps {
   currentQuestion: number;
   answers: Answers;
   playerLabel: PlayerLabel;
+  mode: QuizMode;
   onAnswer: (questionId: string, answer: Answer) => void;
   onPrevious: () => void;
   onNext: () => void;
@@ -25,6 +26,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
   currentQuestion,
   answers,
   playerLabel,
+  mode,
   onAnswer,
   onPrevious,
   onNext,
@@ -82,7 +84,10 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
       <div className="quiz">
         <div className="quiz__header">
           <ProgressBar current={currentQuestion} total={questions.length} />
-          <p className="quiz__block-label">Участник {playerLabel === 'A' ? '1' : '2'} · {question.blockLabel}</p>
+          <p className="quiz__block-label">
+            {mode === 'daily' ? 'Вопросы дня · ' : ''}
+            Участник {playerLabel === 'A' ? '1' : '2'} · {question.blockLabel}
+          </p>
           <h2 className="quiz__question-text">{question.text}</h2>
         </div>
 

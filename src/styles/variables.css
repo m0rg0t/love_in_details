@@ -7,8 +7,8 @@
   /* === Brand Colors === */
   --accent-primary: #e8739e;
   --accent-secondary: #7c5cbf;
-  --accent-gradient: linear-gradient(135deg, #e8739e 0%, #7c5cbf 100%);
-  --accent-gradient-reverse: linear-gradient(135deg, #7c5cbf 0%, #e8739e 100%);
+  --accent-gradient: linear-gradient(135deg, #c14172 0%, #7c5cbf 100%);
+  --accent-gradient-reverse: linear-gradient(135deg, #7c5cbf 0%, #c14172 100%);
 
   /* Result category colors */
   --color-match: #4BB34B;

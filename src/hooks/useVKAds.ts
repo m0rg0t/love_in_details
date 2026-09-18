@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { isVKBridge, checkVKBridge } from '../utils/platform';
 import { vkBridgeService } from '../services/vkBridge';
+import { trackAdShow } from '../utils/analytics';
 
 export function useVKAds() {
   const [bannerVisible, setBannerVisible] = useState(false);
@@ -9,10 +10,17 @@ export function useVKAds() {
     await checkVKBridge();
     if (!isVKBridge()) return false;
     try {
+      const availability = await vkBridgeService.checkInterstitialAd();
+      if (!availability.result) {
+        trackAdShow('interstitial', false);
+        return false;
+      }
       const result = await vkBridgeService.showInterstitialAd();
+      trackAdShow('interstitial', result.result);
       return result.result;
     } catch (err) {
       console.error('[Ads] Interstitial error:', err);
+      trackAdShow('interstitial', false);
       return false;
     }
   }, []);
@@ -22,6 +30,7 @@ export function useVKAds() {
     if (!isVKBridge()) return false;
     try {
       const result = await vkBridgeService.showBannerAd();
+      trackAdShow('banner', result.result);
       if (result.result) {
         setBannerVisible(true);
         return true;
@@ -29,6 +38,7 @@ export function useVKAds() {
       return false;
     } catch (err) {
       console.error('[Ads] Banner error:', err);
+      trackAdShow('banner', false);
       return false;
     }
   }, []);

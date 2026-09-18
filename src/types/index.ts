@@ -79,6 +79,7 @@ export interface ComparisonStats {
 // ── Quiz state ────────────────────────────────────────────────────
 
 export type PlayerLabel = 'A' | 'B';
+export type QuizMode = 'full' | 'daily';
 
 export interface QuizState {
   panel: PanelId;
@@ -86,12 +87,15 @@ export interface QuizState {
   answersA: Answers;
   answersB: Answers;
   playerLabel: PlayerLabel;
+  mode: QuizMode;
+  questionIds: string[];
   results: ComparisonResult[] | null;
   stats: ComparisonStats | null;
 }
 
 export type QuizAction =
-  | { type: 'START_QUIZ' }
+  | { type: 'START_QUIZ'; mode: QuizMode; questionIds: string[] }
+  | { type: 'RESTORE_PROGRESS'; state: QuizState }
   | { type: 'ANSWER_QUESTION'; questionId: string; answer: Answer }
   | { type: 'NEXT_QUESTION' }
   | { type: 'PREVIOUS_QUESTION' }

@@ -41,6 +41,10 @@ export const vkBridgeService = {
   initialize: initializeVKBridge,
   isAvailable: isVKBridgeAvailable,
 
+  checkInterstitialAd: () => bridge.send('VKWebAppCheckNativeAds', {
+    ad_format: 'interstitial',
+  }),
+
   showInterstitialAd: () => bridge.send('VKWebAppShowNativeAds', {
     ad_format: 'interstitial',
   }),
