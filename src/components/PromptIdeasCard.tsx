@@ -26,10 +26,16 @@ export const PromptIdeasCard: React.FC = () => {
       <div className="prompt-ideas__grid" role="list" aria-label="Промпты для пар">
         {CURATED_PROMPT_IDEAS.map((idea) => (
           <article className="prompt-idea" role="listitem" key={idea.id}>
-            <div className={`prompt-idea__preview prompt-idea__preview--${idea.visual}`} aria-hidden="true">
-              <span className="prompt-idea__glow" />
-              <span className="prompt-idea__figure prompt-idea__figure--one" />
-              <span className="prompt-idea__figure prompt-idea__figure--two" />
+            <div className={`prompt-idea__preview prompt-idea__preview--${idea.visual}`}>
+              <img
+                className="prompt-idea__image"
+                src={idea.previewSrc}
+                alt={idea.previewAlt}
+                width="480"
+                height="480"
+                loading="lazy"
+                decoding="async"
+              />
               <span className="prompt-idea__mark">{idea.emoji}</span>
             </div>
             <div className="prompt-idea__body">

@@ -6,6 +6,8 @@ export interface CuratedPromptIdea {
   emoji: string;
   description: string;
   visual: 'comic' | 'neon' | 'cinema';
+  previewSrc: string;
+  previewAlt: string;
 }
 
 export const CURATED_PROMPT_IDEAS: readonly CuratedPromptIdea[] = [
@@ -15,6 +17,8 @@ export const CURATED_PROMPT_IDEAS: readonly CuratedPromptIdea[] = [
     emoji: '💞',
     description: 'Тёплая рисованная история о вас двоих',
     visual: 'comic',
+    previewSrc: '/assets/prompt-ideas/love-is.webp',
+    previewAlt: 'Пример пары в мягком рисованном стиле Love is',
   },
   {
     id: 'template-23bp63d18sr0205',
@@ -22,6 +26,8 @@ export const CURATED_PROMPT_IDEAS: readonly CuratedPromptIdea[] = [
     emoji: '🌃',
     description: 'Сияющий ночной кадр с атмосферой города',
     visual: 'neon',
+    previewSrc: '/assets/prompt-ideas/neon-love.webp',
+    previewAlt: 'Пример пары на ночной улице в свете неонового сердца',
   },
   {
     id: 'template-3nah63271xr9wp3',
@@ -29,6 +35,8 @@ export const CURATED_PROMPT_IDEAS: readonly CuratedPromptIdea[] = [
     emoji: '🎬',
     description: 'Кинематографичная обложка вашей истории',
     visual: 'cinema',
+    previewSrc: '/assets/prompt-ideas/love-movie-poster.webp',
+    previewAlt: 'Пример романтического кинокадра с парой под дождём',
   },
 ] as const;
 
