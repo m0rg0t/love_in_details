@@ -5,6 +5,7 @@ import {
   loadQuizProgress,
   saveQuizProgress,
 } from './quizProgress';
+import { getQuestionPack } from '../data/questionPacks';
 
 function createStorage() {
   const values = new Map<string, string>();
@@ -26,6 +27,7 @@ const progressState: QuizState = {
   answersB: { 'support-comfort': 'listen' },
   playerLabel: 'B',
   mode: 'daily',
+  packId: null,
   questionIds: ['support-comfort', 'comm-conflict', 'time-evening'],
   results: null,
   stats: null,
@@ -70,5 +72,39 @@ describe('quiz progress persistence', () => {
     clearQuizProgress(storage);
 
     expect(loadQuizProgress(storage)).toBeNull();
+  });
+
+  it('restores an unfinished thematic pack', () => {
+    const storage = createStorage();
+    const pack = getQuestionPack('care');
+    expect(pack).not.toBeNull();
+
+    const packState: QuizState = {
+      ...progressState,
+      mode: 'pack',
+      packId: 'care',
+      currentQuestion: 0,
+      answersA: {},
+      answersB: {},
+      questionIds: pack!.questions.map((question) => question.id),
+    };
+
+    saveQuizProgress(packState, storage);
+
+    expect(loadQuizProgress(storage)?.state).toEqual(packState);
+  });
+
+  it('migrates saved progress created before themed packs existed', () => {
+    const storage = createStorage();
+    const legacyState = { ...progressState } as Partial<QuizState>;
+    delete legacyState.packId;
+    storage.setItem('love-in-details:quiz-progress:v1', JSON.stringify({
+      version: 1,
+      savedAt: '2026-09-20T12:00:00.000Z',
+      state: legacyState,
+    }));
+
+    expect(loadQuizProgress(storage, new Date('2026-09-20T12:01:00.000Z').getTime())?.state.packId)
+      .toBeNull();
   });
 });

@@ -14,6 +14,7 @@ const initialState: QuizState = {
   answersB: {},
   playerLabel: 'A',
   mode: 'full',
+  packId: null,
   questionIds: [],
   results: null,
   stats: null,
@@ -26,6 +27,7 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
         ...initialState,
         panel: 'quiz-a',
         mode: action.mode,
+        packId: action.packId ?? null,
         questionIds: action.questionIds,
       };
 

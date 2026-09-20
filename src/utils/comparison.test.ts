@@ -28,4 +28,19 @@ describe('compareAnswers', () => {
     const { stats } = compareAnswers({ scale: 3 }, { scale: 3 }, [scaleQuestion]);
     expect(stats).toMatchObject({ matchCount: 1, totalQuestions: 1 });
   });
+
+  it('uses the same ratio thresholds for compact and full quizzes', () => {
+    const compactQuestions: Question[] = Array.from({ length: 3 }, (_, index) => ({
+      ...scaleQuestion,
+      id: `scale-${index}`,
+    }));
+    const answersA = Object.fromEntries(compactQuestions.map((question) => [question.id, 3]));
+    const answersB = Object.fromEntries(compactQuestions.map((question, index) => [
+      question.id,
+      index < 2 ? 3 : 5,
+    ]));
+
+    expect(compareAnswers(answersA, answersB, compactQuestions).stats.summaryMessage)
+      .toContain('во многом совпадаем');
+  });
 });

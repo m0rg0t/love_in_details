@@ -1,10 +1,12 @@
+import { allQuestions, getQuestionPack } from '../data/questionPacks';
 import { questions } from '../data/questions';
-import type { Answers, PanelId, QuizMode, QuizState } from '../types';
+import type { Answers, PanelId, QuestionPackId, QuizMode, QuizState } from '../types';
 
 const STORAGE_KEY = 'love-in-details:quiz-progress:v1';
-const STORAGE_VERSION = 1;
+const STORAGE_VERSION = 2;
 const PROGRESS_TTL_MS = 7 * 24 * 60 * 60 * 1000;
-const VALID_QUESTION_IDS = new Set(questions.map((question) => question.id));
+const VALID_QUESTION_IDS = new Set(allQuestions.map((question) => question.id));
+const BASE_QUESTION_IDS = new Set(questions.map((question) => question.id));
 const IN_PROGRESS_PANELS: PanelId[] = ['quiz-a', 'handoff', 'quiz-b'];
 
 export interface QuizProgressSnapshot {
@@ -40,13 +42,23 @@ function isAnswers(value: unknown, questionIds: string[]): value is Answers {
 }
 
 function isQuizMode(value: unknown): value is QuizMode {
-  return value === 'full' || value === 'daily';
+  return value === 'full' || value === 'daily' || value === 'pack';
+}
+
+function isQuestionPackId(value: unknown): value is QuestionPackId {
+  return value === 'care' || value === 'dreams' || value === 'adventures';
+}
+
+function withProgressDefaults(value: unknown): unknown {
+  if (!isRecord(value)) return value;
+  return 'packId' in value ? value : { ...value, packId: null };
 }
 
 function isRestorableState(value: unknown): value is QuizState {
   if (!isRecord(value)) return false;
   if (!IN_PROGRESS_PANELS.includes(value.panel as PanelId)) return false;
   if (!isQuizMode(value.mode)) return false;
+  if (value.packId !== null && !isQuestionPackId(value.packId)) return false;
   if (!Array.isArray(value.questionIds)) return false;
 
   const questionIds = value.questionIds;
@@ -58,8 +70,23 @@ function isRestorableState(value: unknown): value is QuizState {
     return false;
   }
 
-  if (value.mode === 'daily' && questionIds.length !== 3) return false;
-  if (value.mode === 'full' && questionIds.length !== questions.length) return false;
+  if (value.mode === 'daily' && (
+    value.packId !== null
+    || questionIds.length !== 3
+    || !questionIds.every((id) => BASE_QUESTION_IDS.has(id))
+  )) return false;
+  if (value.mode === 'full' && (
+    value.packId !== null
+    || questionIds.length !== questions.length
+    || !questionIds.every((id) => BASE_QUESTION_IDS.has(id))
+  )) return false;
+  if (value.mode === 'pack') {
+    if (!isQuestionPackId(value.packId)) return false;
+    const pack = getQuestionPack(value.packId);
+    const packQuestionIds = new Set(pack?.questions.map((question) => question.id));
+    if (!pack || questionIds.length !== pack.questions.length) return false;
+    if (!questionIds.every((id) => packQuestionIds.has(id))) return false;
+  }
   if (!Number.isInteger(value.currentQuestion)) return false;
   if ((value.currentQuestion as number) < 0 || (value.currentQuestion as number) >= questionIds.length) return false;
   if (value.playerLabel !== 'A' && value.playerLabel !== 'B') return false;
@@ -103,18 +130,31 @@ export function loadQuizProgress(
     const raw = storage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed: unknown = JSON.parse(raw);
-    if (!isRecord(parsed) || parsed.version !== STORAGE_VERSION || typeof parsed.savedAt !== 'string') {
+    if (
+      !isRecord(parsed)
+      || (parsed.version !== 1 && parsed.version !== STORAGE_VERSION)
+      || typeof parsed.savedAt !== 'string'
+    ) {
       storage.removeItem(STORAGE_KEY);
       return null;
     }
 
     const savedAt = Date.parse(parsed.savedAt);
-    if (!Number.isFinite(savedAt) || now - savedAt > PROGRESS_TTL_MS || !isRestorableState(parsed.state)) {
+    const state = withProgressDefaults(parsed.state);
+    if (!Number.isFinite(savedAt) || now - savedAt > PROGRESS_TTL_MS || !isRestorableState(state)) {
       storage.removeItem(STORAGE_KEY);
       return null;
     }
 
-    return parsed as unknown as QuizProgressSnapshot;
+    const snapshot: QuizProgressSnapshot = {
+      version: STORAGE_VERSION,
+      savedAt: parsed.savedAt,
+      state,
+    };
+    if (parsed.version !== STORAGE_VERSION) {
+      try { storage.setItem(STORAGE_KEY, JSON.stringify(snapshot)); } catch { /* migration is optional */ }
+    }
+    return snapshot;
   } catch {
     try { storage.removeItem(STORAGE_KEY); } catch { /* storage may be unavailable */ }
     return null;

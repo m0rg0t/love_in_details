@@ -8,14 +8,21 @@ import { ResultHighlights } from './ResultHighlights';
 import { RelationshipMap } from './RelationshipMap';
 import { ShareSection } from './ShareSection';
 import { PromptIdeasCard } from './PromptIdeasCard';
+import { ResultActionCard } from './ResultActionCard';
+import { FavoriteReturnCard } from './FavoriteReturnCard';
+import { getRelationshipAction } from '../utils/relationshipActions';
+import { getResultPresentation, type ResultTone } from '../utils/resultPresentation';
 
 interface ResultsScreenProps {
   id: string;
   results: ComparisonResult[] | null;
   stats: ComparisonStats | null;
   questions: Question[];
+  sessionSeed?: string;
+  initialActionCompleted?: boolean;
   onRestart: () => void;
   onRevealDetails?: () => Promise<unknown>;
+  onActionComplete?: (actionId: string, tone: ResultTone) => void;
 }
 
 function getAnswersHeading(count: number): string {
@@ -35,11 +42,15 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
   results,
   stats,
   questions,
+  sessionSeed,
+  initialActionCompleted = false,
   onRestart,
   onRevealDetails,
+  onActionComplete,
 }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [isRevealingDetails, setIsRevealingDetails] = useState(false);
+  const [actionCompleted, setActionCompleted] = useState(initialActionCompleted);
   const adAttemptedRef = useRef(false);
   const revealPendingRef = useRef(false);
 
@@ -80,6 +91,12 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
     );
   }
 
+  const tone = getResultPresentation(stats).tone;
+  const action = getRelationshipAction(
+    tone,
+    sessionSeed ?? results.map((result) => result.questionId).join('-'),
+  );
+
   return (
     <Panel id={id}>
       <div className="results">
@@ -88,6 +105,18 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
         <ResultHighlights results={results} questions={questions} />
 
         <RelationshipMap results={results} questions={questions} />
+
+        <ResultActionCard
+          action={action}
+          completed={actionCompleted}
+          onComplete={() => {
+            if (actionCompleted) return;
+            setActionCompleted(true);
+            onActionComplete?.(action.id, tone);
+          }}
+        />
+
+        <FavoriteReturnCard />
 
         <PromptIdeasCard />
 

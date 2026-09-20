@@ -54,7 +54,7 @@ export type Answers = Record<string, Answer>;
 
 // ── Navigation ────────────────────────────────────────────────────
 
-export type PanelId = 'welcome' | 'quiz-a' | 'handoff' | 'quiz-b' | 'results';
+export type PanelId = 'welcome' | 'packs' | 'history' | 'quiz-a' | 'handoff' | 'quiz-b' | 'results';
 
 // ── Comparison ────────────────────────────────────────────────────
 
@@ -79,7 +79,8 @@ export interface ComparisonStats {
 // ── Quiz state ────────────────────────────────────────────────────
 
 export type PlayerLabel = 'A' | 'B';
-export type QuizMode = 'full' | 'daily';
+export type QuizMode = 'full' | 'daily' | 'pack';
+export type QuestionPackId = 'care' | 'dreams' | 'adventures';
 
 export interface QuizState {
   panel: PanelId;
@@ -88,13 +89,14 @@ export interface QuizState {
   answersB: Answers;
   playerLabel: PlayerLabel;
   mode: QuizMode;
+  packId: QuestionPackId | null;
   questionIds: string[];
   results: ComparisonResult[] | null;
   stats: ComparisonStats | null;
 }
 
 export type QuizAction =
-  | { type: 'START_QUIZ'; mode: QuizMode; questionIds: string[] }
+  | { type: 'START_QUIZ'; mode: QuizMode; questionIds: string[]; packId?: QuestionPackId | null }
   | { type: 'RESTORE_PROGRESS'; state: QuizState }
   | { type: 'ANSWER_QUESTION'; questionId: string; answer: Answer }
   | { type: 'NEXT_QUESTION' }

@@ -1,26 +1,25 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ConfigProvider,
   AdaptivityProvider,
   AppRoot,
   SplitLayout,
   SplitCol,
-  View,
 } from '@vkontakte/vkui';
 import { useAppearance } from '@vkontakte/vk-bridge-react';
 import '@vkontakte/vkui/dist/vkui.css';
 import './styles/index.css';
 
 import { VKInsetsProvider } from './components/VKInsetsProvider';
-import { WelcomeScreen } from './components/WelcomeScreen';
-import { QuizScreen } from './components/QuizScreen';
-import { HandoffScreen } from './components/HandoffScreen';
-import { ResultsScreen } from './components/ResultsScreen';
+import { AppPanels } from './components/AppPanels';
 import { useQuizState } from './hooks/useQuizState';
+import { useSessionHistory } from './hooks/useSessionHistory';
 import { useBackButton } from './hooks/useBackButton';
 import { useVKAds } from './hooks/useVKAds';
 import { questions } from './data/questions';
+import { allQuestions, getQuestionPack, getQuizLabel } from './data/questionPacks';
 import { compareAnswers } from './utils/comparison';
+import { getResultPresentation, type ResultTone } from './utils/resultPresentation';
 import { getDailyQuestions } from './utils/dailyQuestions';
 import {
   trackAppStart,
@@ -29,10 +28,14 @@ import {
   trackPlayerSwitch,
   trackQuizComplete,
   trackRestart,
+  trackHistoryOpen,
+  trackPackStart,
+  trackPacksOpen,
+  trackResultActionComplete,
 } from './utils/analytics';
 import { checkVKBridge } from './utils/platform';
 import { isDebugMode, getDebugPanel, getDebugState } from './utils/debugMode';
-import type { PanelId, Answer, QuizMode } from './types';
+import type { PanelId, Answer, QuestionPackId, QuizMode } from './types';
 
 const App: React.FC = () => {
   const appearance = useAppearance();
@@ -43,13 +46,22 @@ const App: React.FC = () => {
     resumeProgress,
     clearSavedProgress,
   } = useQuizState();
+  const { entries: historyEntries, recordSession, completeAction } = useSessionHistory();
   const { showInterstitialAd, showBannerAd, hideBannerAd } = useVKAds();
   const startupHandledRef = useRef(false);
+  const completionHandledRef = useRef(false);
+  const [activeHistoryId, setActiveHistoryId] = useState<string | null>(null);
 
   const setActivePanel = useCallback((panel: PanelId) => {
     if (panel === 'welcome') {
+      completionHandledRef.current = false;
+      setActiveHistoryId(null);
       dispatch({ type: 'RESTART' });
       return;
+    }
+    if (panel === 'quiz-b') {
+      completionHandledRef.current = false;
+      setActiveHistoryId(null);
     }
     dispatch({ type: 'NAVIGATE_TO_PANEL', panel });
   }, [dispatch]);
@@ -118,7 +130,7 @@ const App: React.FC = () => {
 
   const activeQuestions = useMemo(() => {
     if (state.questionIds.length === 0) return questions;
-    const questionsById = new Map(questions.map((question) => [question.id, question]));
+    const questionsById = new Map(allQuestions.map((question) => [question.id, question]));
     const selected = state.questionIds.flatMap((id) => {
       const question = questionsById.get(id);
       return question ? [question] : [];
@@ -126,20 +138,30 @@ const App: React.FC = () => {
     return selected.length === state.questionIds.length ? selected : questions;
   }, [state.questionIds]);
 
-  const handleStart = useCallback((mode: QuizMode) => {
-    const selectedQuestions = mode === 'daily' ? getDailyQuestions(questions) : questions;
+  const handleStart = useCallback((mode: QuizMode, packId: QuestionPackId | null = null) => {
+    const pack = mode === 'pack' ? getQuestionPack(packId) : null;
+    if (mode === 'pack' && !pack) return;
+    const selectedQuestions = mode === 'daily'
+      ? getDailyQuestions(questions)
+      : pack?.questions ?? questions;
+    completionHandledRef.current = false;
+    setActiveHistoryId(null);
     clearSavedProgress();
     dispatch({
       type: 'START_QUIZ',
       mode,
+      packId,
       questionIds: selectedQuestions.map((question) => question.id),
     });
     pushPanel('quiz-a');
-    trackQuizStart(mode);
+    trackQuizStart(mode, packId);
+    if (packId) trackPackStart(packId);
   }, [clearSavedProgress, dispatch, pushPanel]);
 
   const handleResume = useCallback(() => {
     if (!savedProgress) return;
+    completionHandledRef.current = false;
+    setActiveHistoryId(null);
     const panel = resumeProgress();
     if (!panel) return;
     pushPanel(panel);
@@ -158,7 +180,17 @@ const App: React.FC = () => {
       pushPanel('handoff');
       trackPlayerSwitch();
     } else if (isLastQuestion && state.playerLabel === 'B') {
+      if (completionHandledRef.current) return;
+      completionHandledRef.current = true;
       const { results, stats } = compareAnswers(state.answersA, state.answersB, activeQuestions);
+      const historyEntry = recordSession({
+        mode: state.mode,
+        packId: state.packId,
+        matchCount: stats.matchCount,
+        totalQuestions: stats.totalQuestions,
+        tone: getResultPresentation(stats).tone,
+      });
+      setActiveHistoryId(historyEntry.id);
       dispatch({ type: 'FINISH_QUIZ', results, stats });
       pushPanel('results');
       trackQuizComplete(stats.matchCount, stats.totalQuestions, state.mode);
@@ -172,8 +204,10 @@ const App: React.FC = () => {
     state.answersA,
     state.answersB,
     state.mode,
+    state.packId,
     dispatch,
     pushPanel,
+    recordSession,
   ]);
 
   const handlePrevious = useCallback(() => {
@@ -187,12 +221,39 @@ const App: React.FC = () => {
 
   const handleRestart = useCallback(() => {
     const completedMode = state.mode;
+    completionHandledRef.current = false;
+    setActiveHistoryId(null);
     clearSavedProgress();
     dispatch({ type: 'RESTART' });
     pushPanel('welcome');
     hideBannerAd(); // Hide banner ad when restarting
     trackRestart(completedMode);
   }, [clearSavedProgress, dispatch, pushPanel, hideBannerAd, state.mode]);
+
+  const handleOpenPacks = useCallback(() => {
+    dispatch({ type: 'NAVIGATE_TO_PANEL', panel: 'packs' });
+    pushPanel('packs');
+    trackPacksOpen();
+  }, [dispatch, pushPanel]);
+
+  const handleOpenHistory = useCallback(() => {
+    dispatch({ type: 'NAVIGATE_TO_PANEL', panel: 'history' });
+    pushPanel('history');
+    trackHistoryOpen(historyEntries.length);
+  }, [dispatch, historyEntries.length, pushPanel]);
+
+  const handlePanelBack = useCallback(() => {
+    if ((Number(window.history.state?.appDepth) || 0) > 0) {
+      window.history.back();
+      return;
+    }
+    setActivePanel('welcome');
+  }, [setActivePanel]);
+
+  const handleActionComplete = useCallback((actionId: string, tone: ResultTone) => {
+    if (activeHistoryId) completeAction(activeHistoryId);
+    trackResultActionComplete(actionId, tone);
+  }, [activeHistoryId, completeAction]);
 
   const currentAnswers = state.playerLabel === 'A' ? state.answersA : state.answersB;
 
@@ -208,11 +269,16 @@ const App: React.FC = () => {
         playerLabel: savedProgress.state.playerLabel,
         currentQuestion: savedProgress.state.currentQuestion,
         totalQuestions: savedProgress.state.questionIds.length,
+        packId: savedProgress.state.packId,
       }
     : null;
   const resultsSessionKey = state.results
-    ? `results-${state.mode}-${state.results.map((result) => result.questionId).join('-')}`
+    ? `results-${activeHistoryId ?? state.mode}-${state.results.map((result) => result.questionId).join('-')}`
     : 'results-empty';
+  const activeHistoryEntry = activeHistoryId
+    ? historyEntries.find((entry) => entry.id === activeHistoryId) ?? null
+    : null;
+  const modeLabel = getQuizLabel(state.mode, state.packId);
 
   return (
     <ConfigProvider colorScheme={appearance ?? undefined}>
@@ -221,47 +287,33 @@ const App: React.FC = () => {
           <VKInsetsProvider>
             <SplitLayout>
               <SplitCol>
-                <View activePanel={activePanel}>
-                  <WelcomeScreen
-                    id="welcome"
-                    resume={resumeSummary}
-                    onResume={handleResume}
-                    onStartDaily={() => handleStart('daily')}
-                    onStartFull={() => handleStart('full')}
-                  />
-                  <QuizScreen
-                    id="quiz-a"
-                    questions={activeQuestions}
-                    currentQuestion={state.currentQuestion}
-                    answers={currentAnswers}
-                    playerLabel={state.playerLabel}
-                    mode={state.mode}
-                    onAnswer={handleAnswer}
-                    onPrevious={handlePrevious}
-                    onNext={handleNext}
-                  />
-                  <HandoffScreen id="handoff" onReady={handleHandoffReady} />
-                  <QuizScreen
-                    id="quiz-b"
-                    questions={activeQuestions}
-                    currentQuestion={state.currentQuestion}
-                    answers={currentAnswers}
-                    playerLabel={state.playerLabel}
-                    mode={state.mode}
-                    onAnswer={handleAnswer}
-                    onPrevious={handlePrevious}
-                    onNext={handleNext}
-                  />
-                  <ResultsScreen
-                    key={resultsSessionKey}
-                    id="results"
-                    results={state.results}
-                    stats={state.stats}
-                    questions={activeQuestions}
-                    onRestart={handleRestart}
-                    onRevealDetails={showInterstitialAd}
-                  />
-                </View>
+                <AppPanels
+                  activePanel={activePanel}
+                  resume={resumeSummary}
+                  historyEntries={historyEntries}
+                  questions={activeQuestions}
+                  currentQuestion={state.currentQuestion}
+                  currentAnswers={currentAnswers}
+                  playerLabel={state.playerLabel}
+                  mode={state.mode}
+                  modeLabel={modeLabel}
+                  results={state.results}
+                  stats={state.stats}
+                  resultsSessionKey={resultsSessionKey}
+                  activeHistoryEntry={activeHistoryEntry}
+                  onResume={handleResume}
+                  onStart={handleStart}
+                  onOpenPacks={handleOpenPacks}
+                  onOpenHistory={handleOpenHistory}
+                  onPanelBack={handlePanelBack}
+                  onAnswer={handleAnswer}
+                  onPrevious={handlePrevious}
+                  onNext={handleNext}
+                  onHandoffReady={handleHandoffReady}
+                  onRestart={handleRestart}
+                  onRevealDetails={showInterstitialAd}
+                  onActionComplete={handleActionComplete}
+                />
               </SplitCol>
             </SplitLayout>
           </VKInsetsProvider>

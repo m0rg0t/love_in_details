@@ -1,4 +1,5 @@
-import type { PanelId, QuizMode } from '../types';
+import type { PanelId, QuestionPackId, QuizMode } from '../types';
+import type { ResultTone } from './resultPresentation';
 
 declare global {
   interface Window {
@@ -20,8 +21,11 @@ export function trackAppStart(mode: 'vk' | 'standalone', hasSavedProgress = fals
   track('app_start', { mode, has_saved_progress: bool(hasSavedProgress) });
 }
 
-export function trackQuizStart(quizMode: QuizMode) {
-  track('quiz_start', { quiz_mode: quizMode });
+export function trackQuizStart(quizMode: QuizMode, packId: QuestionPackId | null = null) {
+  track('quiz_start', {
+    quiz_mode: quizMode,
+    ...(packId ? { pack_id: packId } : {}),
+  });
 }
 
 export function trackQuizResume(quizMode: QuizMode, panel: PanelId) {
@@ -54,6 +58,26 @@ export function trackAdShow(format: 'interstitial' | 'banner', success: boolean)
 
 export function trackRestart(quizMode: QuizMode) {
   track('restart', { quiz_mode: quizMode });
+}
+
+export function trackAddToFavorites(success: boolean) {
+  track('add_to_favorites', { success: bool(success) });
+}
+
+export function trackPacksOpen() {
+  track('packs_open');
+}
+
+export function trackPackStart(packId: QuestionPackId) {
+  track('pack_start', { pack_id: packId });
+}
+
+export function trackHistoryOpen(entriesCount: number) {
+  track('history_open', { entries_count: entriesCount });
+}
+
+export function trackResultActionComplete(actionId: string, tone: ResultTone) {
+  track('result_action_complete', { action_id: actionId, tone });
 }
 
 export function trackOpenImagePrompts(

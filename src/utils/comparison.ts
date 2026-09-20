@@ -43,10 +43,11 @@ export function computeStats(results: ComparisonResult[]): ComparisonStats {
   const dialogueCount = results.filter((r) => r.category === 'dialogue_topic').length;
   const totalQuestions = results.length;
 
+  const matchRatio = totalQuestions > 0 ? matchCount / totalQuestions : 0;
   let summaryMessage: string;
-  if (matchCount >= 8) {
+  if (matchRatio >= 2 / 3) {
     summaryMessage = 'Мы во многом совпадаем! Отличная основа для понимания.';
-  } else if (matchCount >= 5) {
+  } else if (matchRatio >= 0.4) {
     summaryMessage = 'У нас хороший баланс совпадений и различий.';
   } else {
     summaryMessage = 'У нас много тем для интересного разговора!';

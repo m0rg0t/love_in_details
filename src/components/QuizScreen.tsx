@@ -15,6 +15,7 @@ interface QuizScreenProps {
   answers: Answers;
   playerLabel: PlayerLabel;
   mode: QuizMode;
+  modeLabel?: string;
   onAnswer: (questionId: string, answer: Answer) => void;
   onPrevious: () => void;
   onNext: () => void;
@@ -27,6 +28,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
   answers,
   playerLabel,
   mode,
+  modeLabel,
   onAnswer,
   onPrevious,
   onNext,
@@ -85,7 +87,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
         <div className="quiz__header">
           <ProgressBar current={currentQuestion} total={questions.length} />
           <p className="quiz__block-label">
-            {mode === 'daily' ? 'Вопросы дня · ' : ''}
+            {mode !== 'full' ? `${modeLabel ?? 'Короткий квиз'} · ` : ''}
             Участник {playerLabel === 'A' ? '1' : '2'} · {question.blockLabel}
           </p>
           <h2 className="quiz__question-text">{question.text}</h2>

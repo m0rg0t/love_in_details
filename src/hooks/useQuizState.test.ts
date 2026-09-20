@@ -9,6 +9,7 @@ const quizState: QuizState = {
   answersB: {},
   playerLabel: 'A',
   mode: 'full',
+  packId: null,
   questionIds: ['first', 'second', 'third', 'fourth', 'fifth'],
   results: null,
   stats: null,

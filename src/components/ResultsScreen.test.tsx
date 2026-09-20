@@ -8,6 +8,7 @@ vi.mock('./ResultHighlights', () => ({ ResultHighlights: () => <div>Главно
 vi.mock('./RelationshipMap', () => ({ RelationshipMap: () => <div>Карта</div> }));
 vi.mock('./PromptIdeasCard', () => ({ PromptIdeasCard: () => <div>Промпты</div> }));
 vi.mock('./ShareSection', () => ({ ShareSection: () => <div>Поделиться</div> }));
+vi.mock('./FavoriteReturnCard', () => ({ FavoriteReturnCard: () => null }));
 vi.mock('./ResultCard', () => ({
   ResultCard: ({ question }: { question: Question }) => <div>Деталь: {question.text}</div>,
 }));
@@ -117,5 +118,25 @@ describe('ResultsScreen detailed answers', () => {
 
     expect(screen.queryByText('Деталь: Тестовый вопрос')).not.toBeNull();
     expect(onRevealDetails).toHaveBeenCalledTimes(1);
+  });
+
+  it('marks the suggested action as completed', () => {
+    const onActionComplete = vi.fn();
+    render(
+      <ResultsScreen
+        id="results"
+        results={results}
+        stats={stats}
+        questions={[question]}
+        sessionSeed="test-session"
+        onRestart={vi.fn()}
+        onActionComplete={onActionComplete}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Сделали 💞' }));
+
+    expect(onActionComplete).toHaveBeenCalledOnce();
+    expect(screen.queryByRole('button', { name: 'Сделано' })).not.toBeNull();
   });
 });

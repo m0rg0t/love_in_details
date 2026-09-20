@@ -2,13 +2,17 @@ import React from 'react';
 import { Panel, Button } from '@vkontakte/vkui';
 import {
   Icon24ArrowRightOutline,
+  Icon24HistoryBackwardOutline,
   Icon24MagicWandOutline,
+  Icon24PaletteOutline,
   Icon28CalendarOutline,
   Icon28HistoryBackwardOutline,
 } from '@vkontakte/icons';
+import { getQuizLabel } from '../data/questionPacks';
 import { useImagePrompts } from '../hooks/useImagePrompts';
 import { DEFAULT_COUPLE_PROMPT_ID } from '../utils/imagePrompts';
-import type { PanelId, PlayerLabel, QuizMode } from '../types';
+import type { SessionHistoryEntry } from '../utils/sessionHistory';
+import type { PanelId, PlayerLabel, QuestionPackId, QuizMode } from '../types';
 
 export interface ResumeQuizSummary {
   mode: QuizMode;
@@ -16,14 +20,19 @@ export interface ResumeQuizSummary {
   playerLabel: PlayerLabel;
   currentQuestion: number;
   totalQuestions: number;
+  packId: QuestionPackId | null;
 }
 
 interface WelcomeScreenProps {
   id: string;
   resume: ResumeQuizSummary | null;
+  latestSession: SessionHistoryEntry | null;
+  historyCount: number;
   onResume: () => void;
   onStartDaily: () => void;
   onStartFull: () => void;
+  onOpenPacks: () => void;
+  onOpenHistory: () => void;
 }
 
 function getResumeLabel(resume: ResumeQuizSummary): string {
@@ -38,9 +47,13 @@ function getResumeLabel(resume: ResumeQuizSummary): string {
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   id,
   resume,
+  latestSession,
+  historyCount,
   onResume,
   onStartDaily,
   onStartFull,
+  onOpenPacks,
+  onOpenHistory,
 }) => {
   const { openImagePrompt } = useImagePrompts();
 
@@ -60,7 +73,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             </div>
             <div className="welcome-card__copy">
               <span className="welcome-card__eyebrow">
-                {resume.mode === 'daily' ? 'Вопросы дня' : 'Полный квиз'} · прогресс сохранён
+                {getQuizLabel(resume.mode, resume.packId)} · прогресс сохранён
               </span>
               <h2 id="welcome-resume-title">Продолжим с того же места?</h2>
               <p>{getResumeLabel(resume)}</p>
@@ -74,6 +87,31 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
               Продолжить
             </Button>
             <span className="welcome-resume__note">Ответы хранятся только на этом устройстве</span>
+          </section>
+        )}
+
+        {!resume && latestSession && (
+          <section className="welcome-card welcome-return" aria-labelledby="welcome-return-title">
+            <div className="welcome-card__icon welcome-return__icon" aria-hidden="true">
+              <Icon28HistoryBackwardOutline />
+            </div>
+            <div className="welcome-card__copy">
+              <span className="welcome-card__eyebrow">С возвращением</span>
+              <h2 id="welcome-return-title">Ваша история продолжается</h2>
+              <p>
+                Последний результат: {getQuizLabel(latestSession.mode, latestSession.packId)} ·{' '}
+                {latestSession.matchCount} из {latestSession.totalQuestions} совпали
+              </p>
+            </div>
+            <Button
+              size="m"
+              mode="secondary"
+              className="welcome-card__button"
+              before={<Icon24HistoryBackwardOutline />}
+              onClick={onOpenHistory}
+            >
+              Посмотреть историю · {historyCount}
+            </Button>
           </section>
         )}
 
@@ -104,6 +142,27 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
         >
           Полный квиз · 12 вопросов
         </Button>
+
+        <div className={`welcome__explore${historyCount > 0 ? ' welcome__explore--with-history' : ''}`}>
+          <Button
+            size="l"
+            mode="secondary"
+            before={<Icon24PaletteOutline />}
+            onClick={onOpenPacks}
+          >
+            Выбрать тему
+          </Button>
+          {historyCount > 0 && (
+            <Button
+              size="l"
+              mode="secondary"
+              before={<Icon24HistoryBackwardOutline />}
+              onClick={onOpenHistory}
+            >
+              История
+            </Button>
+          )}
+        </div>
 
         <div className="welcome__rules stagger-children">
           <div className="welcome__rule">

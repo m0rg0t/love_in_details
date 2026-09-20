@@ -125,6 +125,22 @@
   text-align: center;
 }
 
+.welcome-return {
+  border-color: rgba(124, 92, 191, 0.22);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(124, 92, 191, 0.12), transparent 44%),
+    var(--vkui--color_background_secondary, rgba(0, 0, 0, 0.035));
+}
+
+.welcome-return__icon {
+  color: #7c5cbf;
+  background: rgba(124, 92, 191, 0.13);
+}
+
+.welcome-return .welcome-card__button {
+  color: var(--vkui--color_text_primary, #000) !important;
+}
+
 .welcome-daily {
   border-color: rgba(232, 115, 158, 0.3);
   background:
@@ -144,7 +160,24 @@
 
 .welcome__full-button {
   width: 100%;
+  margin-bottom: var(--space-md);
+  color: var(--vkui--color_text_primary, #000) !important;
+}
+
+.welcome__explore {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-sm);
+  width: 100%;
   margin-bottom: var(--space-xl);
+}
+
+.welcome__explore--with-history {
+  grid-template-columns: 1fr 1fr;
+}
+
+.welcome__explore .vkuiButton {
+  width: 100%;
   color: var(--vkui--color_text_primary, #000) !important;
 }
 
@@ -199,6 +232,11 @@
   background-image: linear-gradient(135deg, #ff9fc2 0%, #c7aeff 100%);
 }
 
+.vkui--vkBase--dark .welcome-return__icon {
+  color: #c7aeff;
+  background: rgba(199, 174, 255, 0.14);
+}
+
 @media (max-width: 380px) {
   .welcome {
     padding-inline: var(--space-lg);
@@ -216,5 +254,9 @@
   .welcome-card__icon {
     width: 42px;
     height: 42px;
+  }
+
+  .welcome__explore--with-history {
+    grid-template-columns: 1fr;
   }
 }

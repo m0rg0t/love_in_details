@@ -24,7 +24,15 @@ export function getDebugPanel(): PanelId | null {
   const panel = params.get('panel');
 
   // Validate panel ID
-  const validPanels: PanelId[] = ['welcome', 'quiz-a', 'handoff', 'quiz-b', 'results'];
+  const validPanels: PanelId[] = [
+    'welcome',
+    'packs',
+    'history',
+    'quiz-a',
+    'handoff',
+    'quiz-b',
+    'results',
+  ];
   if (panel && validPanels.includes(panel as PanelId)) {
     return panel as PanelId;
   }
@@ -64,6 +72,7 @@ export function getDebugState(): QuizState {
     answersB: mockAnswersB,
     playerLabel: 'A', // Doesn't matter for results screen
     mode: 'full',
+    packId: null,
     questionIds: [],
     results: mockResults,
     stats: mockStats,

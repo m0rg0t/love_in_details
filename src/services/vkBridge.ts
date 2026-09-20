@@ -66,6 +66,10 @@ export const vkBridgeService = {
 
   shareApp: (link: string) => bridge.send('VKWebAppShare', { link }),
 
+  supportsAddToFavorites: () => bridge.supportsAsync('VKWebAppAddToFavorites'),
+
+  addToFavorites: () => bridge.send('VKWebAppAddToFavorites'),
+
   openApp: (appId: number, location?: string) => bridge.send('VKWebAppOpenApp', {
     app_id: appId,
     ...(location ? { location } : {}),
