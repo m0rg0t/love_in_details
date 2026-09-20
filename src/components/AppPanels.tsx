@@ -13,6 +13,7 @@ import type {
 } from '../types';
 import type { ResultTone } from '../utils/resultPresentation';
 import type { SessionHistoryEntry } from '../utils/sessionHistory';
+import type { WeeklyTheme } from '../utils/weeklyTheme';
 import { WelcomeScreen, type ResumeQuizSummary } from './WelcomeScreen';
 import { PacksScreen } from './PacksScreen';
 import { HistoryScreen } from './HistoryScreen';
@@ -24,6 +25,8 @@ interface AppPanelsProps {
   activePanel: PanelId;
   resume: ResumeQuizSummary | null;
   historyEntries: SessionHistoryEntry[];
+  weeklyTheme: WeeklyTheme;
+  weeklyThemeCompleted: boolean;
   questions: Question[];
   currentQuestion: number;
   currentAnswers: Answers;
@@ -38,6 +41,7 @@ interface AppPanelsProps {
   onStart: (mode: QuizMode, packId?: QuestionPackId | null) => void;
   onOpenPacks: () => void;
   onOpenHistory: () => void;
+  onStartWeeklyTheme: () => void;
   onPanelBack: () => void;
   onAnswer: (questionId: string, answer: Answer) => void;
   onPrevious: () => void;
@@ -52,6 +56,8 @@ export const AppPanels: React.FC<AppPanelsProps> = ({
   activePanel,
   resume,
   historyEntries,
+  weeklyTheme,
+  weeklyThemeCompleted,
   questions,
   currentQuestion,
   currentAnswers,
@@ -66,6 +72,7 @@ export const AppPanels: React.FC<AppPanelsProps> = ({
   onStart,
   onOpenPacks,
   onOpenHistory,
+  onStartWeeklyTheme,
   onPanelBack,
   onAnswer,
   onPrevious,
@@ -81,11 +88,14 @@ export const AppPanels: React.FC<AppPanelsProps> = ({
       resume={resume}
       latestSession={historyEntries[0] ?? null}
       historyCount={historyEntries.length}
+      weeklyTheme={weeklyTheme}
+      weeklyThemeCompleted={weeklyThemeCompleted}
       onResume={onResume}
       onStartDaily={() => onStart('daily')}
       onStartFull={() => onStart('full')}
       onOpenPacks={onOpenPacks}
       onOpenHistory={onOpenHistory}
+      onStartWeeklyTheme={onStartWeeklyTheme}
     />
     <PacksScreen
       id="packs"

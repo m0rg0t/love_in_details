@@ -12,7 +12,9 @@ import { getQuizLabel } from '../data/questionPacks';
 import { useImagePrompts } from '../hooks/useImagePrompts';
 import { DEFAULT_COUPLE_PROMPT_ID } from '../utils/imagePrompts';
 import type { SessionHistoryEntry } from '../utils/sessionHistory';
+import type { WeeklyTheme } from '../utils/weeklyTheme';
 import type { PanelId, PlayerLabel, QuestionPackId, QuizMode } from '../types';
+import { WeeklyThemeCard } from './WeeklyThemeCard';
 
 export interface ResumeQuizSummary {
   mode: QuizMode;
@@ -28,11 +30,14 @@ interface WelcomeScreenProps {
   resume: ResumeQuizSummary | null;
   latestSession: SessionHistoryEntry | null;
   historyCount: number;
+  weeklyTheme: WeeklyTheme;
+  weeklyThemeCompleted: boolean;
   onResume: () => void;
   onStartDaily: () => void;
   onStartFull: () => void;
   onOpenPacks: () => void;
   onOpenHistory: () => void;
+  onStartWeeklyTheme: () => void;
 }
 
 function getResumeLabel(resume: ResumeQuizSummary): string {
@@ -49,11 +54,14 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   resume,
   latestSession,
   historyCount,
+  weeklyTheme,
+  weeklyThemeCompleted,
   onResume,
   onStartDaily,
   onStartFull,
   onOpenPacks,
   onOpenHistory,
+  onStartWeeklyTheme,
 }) => {
   const { openImagePrompt } = useImagePrompts();
 
@@ -115,6 +123,13 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           </section>
         )}
 
+        <WeeklyThemeCard
+          theme={weeklyTheme}
+          completed={weeklyThemeCompleted}
+          isSecondary={Boolean(resume)}
+          onStart={onStartWeeklyTheme}
+        />
+
         <section className="welcome-card welcome-daily" aria-labelledby="welcome-daily-title">
           <div className="welcome-card__icon welcome-daily__icon" aria-hidden="true">
             <Icon28CalendarOutline />
@@ -126,8 +141,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           </div>
           <Button
             size="l"
-            mode={resume ? 'secondary' : 'primary'}
-            className={resume ? 'welcome-card__button welcome-daily__button' : 'gradient-button welcome-card__button'}
+            mode="secondary"
+            className="welcome-card__button welcome-daily__button"
             onClick={onStartDaily}
           >
             Ответить вдвоём

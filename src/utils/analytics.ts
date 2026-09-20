@@ -48,7 +48,7 @@ export function trackQuizComplete(matchCount: number, totalQuestions: number, qu
   });
 }
 
-export function trackShare(method: 'story' | 'wall', success: boolean) {
+export function trackShare(method: 'story' | 'link', success: boolean) {
   track('share', { method, success: bool(success) });
 }
 
@@ -70,6 +70,22 @@ export function trackPacksOpen() {
 
 export function trackPackStart(packId: QuestionPackId) {
   track('pack_start', { pack_id: packId });
+}
+
+export function trackWeeklyThemeStart(
+  packId: QuestionPackId,
+  weekKey: string,
+  isReplay: boolean,
+) {
+  track('weekly_theme_start', {
+    pack_id: packId,
+    week_key: weekKey,
+    is_replay: bool(isReplay),
+  });
+}
+
+export function trackWeeklyThemeComplete(packId: QuestionPackId, weekKey: string) {
+  track('weekly_theme_complete', { pack_id: packId, week_key: weekKey });
 }
 
 export function trackHistoryOpen(entriesCount: number) {

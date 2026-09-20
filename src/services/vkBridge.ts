@@ -59,9 +59,14 @@ export const vkBridgeService = {
   subscribe: (handler: VKBridgeSubscribeHandler) => bridge.subscribe(handler),
   unsubscribe: (handler: VKBridgeSubscribeHandler) => bridge.unsubscribe(handler),
 
-  showStory: (blob: string) => bridge.send('VKWebAppShowStoryBox', {
+  showStory: (blob: string, link: string) => bridge.send('VKWebAppShowStoryBox', {
     background_type: 'image',
     blob,
+    attachment: {
+      text: 'open',
+      type: 'url',
+      url: link,
+    },
   }),
 
   shareApp: (link: string) => bridge.send('VKWebAppShare', { link }),

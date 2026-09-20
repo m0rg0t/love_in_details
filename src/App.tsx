@@ -21,6 +21,7 @@ import { allQuestions, getQuestionPack, getQuizLabel } from './data/questionPack
 import { compareAnswers } from './utils/comparison';
 import { getResultPresentation, type ResultTone } from './utils/resultPresentation';
 import { getDailyQuestions } from './utils/dailyQuestions';
+import { getWeeklyTheme, isWeeklyThemeCompleted } from './utils/weeklyTheme';
 import {
   trackAppStart,
   trackQuizStart,
@@ -32,6 +33,8 @@ import {
   trackPackStart,
   trackPacksOpen,
   trackResultActionComplete,
+  trackWeeklyThemeComplete,
+  trackWeeklyThemeStart,
 } from './utils/analytics';
 import { checkVKBridge } from './utils/platform';
 import { isDebugMode, getDebugPanel, getDebugState } from './utils/debugMode';
@@ -47,6 +50,8 @@ const App: React.FC = () => {
     clearSavedProgress,
   } = useQuizState();
   const { entries: historyEntries, recordSession, completeAction } = useSessionHistory();
+  const weeklyTheme = useMemo(() => getWeeklyTheme(), []);
+  const weeklyThemeCompleted = isWeeklyThemeCompleted(historyEntries, weeklyTheme);
   const { showInterstitialAd, showBannerAd, hideBannerAd } = useVKAds();
   const startupHandledRef = useRef(false);
   const completionHandledRef = useRef(false);
@@ -191,6 +196,9 @@ const App: React.FC = () => {
         tone: getResultPresentation(stats).tone,
       });
       setActiveHistoryId(historyEntry.id);
+      if (state.mode === 'pack' && state.packId === weeklyTheme.pack.id) {
+        trackWeeklyThemeComplete(weeklyTheme.pack.id, weeklyTheme.key);
+      }
       dispatch({ type: 'FINISH_QUIZ', results, stats });
       pushPanel('results');
       trackQuizComplete(stats.matchCount, stats.totalQuestions, state.mode);
@@ -208,6 +216,7 @@ const App: React.FC = () => {
     dispatch,
     pushPanel,
     recordSession,
+    weeklyTheme,
   ]);
 
   const handlePrevious = useCallback(() => {
@@ -241,6 +250,11 @@ const App: React.FC = () => {
     pushPanel('history');
     trackHistoryOpen(historyEntries.length);
   }, [dispatch, historyEntries.length, pushPanel]);
+
+  const handleStartWeeklyTheme = useCallback(() => {
+    trackWeeklyThemeStart(weeklyTheme.pack.id, weeklyTheme.key, weeklyThemeCompleted);
+    handleStart('pack', weeklyTheme.pack.id);
+  }, [handleStart, weeklyTheme, weeklyThemeCompleted]);
 
   const handlePanelBack = useCallback(() => {
     if ((Number(window.history.state?.appDepth) || 0) > 0) {
@@ -291,6 +305,8 @@ const App: React.FC = () => {
                   activePanel={activePanel}
                   resume={resumeSummary}
                   historyEntries={historyEntries}
+                  weeklyTheme={weeklyTheme}
+                  weeklyThemeCompleted={weeklyThemeCompleted}
                   questions={activeQuestions}
                   currentQuestion={state.currentQuestion}
                   currentAnswers={currentAnswers}
@@ -305,6 +321,7 @@ const App: React.FC = () => {
                   onStart={handleStart}
                   onOpenPacks={handleOpenPacks}
                   onOpenHistory={handleOpenHistory}
+                  onStartWeeklyTheme={handleStartWeeklyTheme}
                   onPanelBack={handlePanelBack}
                   onAnswer={handleAnswer}
                   onPrevious={handlePrevious}
