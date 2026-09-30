@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@vkontakte/vkui';
 import { Icon24ShareOutline, Icon28StoryOutline } from '@vkontakte/icons';
 import type { ComparisonStats } from '../types';
@@ -7,56 +7,100 @@ import { trackShare } from '../utils/analytics';
 import { getResultPresentation } from '../utils/resultPresentation';
 import { WEEKLY_THEME_IMAGE } from '../utils/weeklyTheme';
 import { vkBridgeService } from '../services/vkBridge';
-import { checkVKBridge, getAppLink, isVKBridge } from '../utils/platform';
+import { getAppLink } from '../utils/platform';
+import { classifyShareResponse } from '../utils/platformPolicy';
+import { isUserCancelError } from '../utils/vkBridgeErrors';
+import { BridgeTimeoutError } from '../utils/timeout';
 
 interface ShareSectionProps {
   stats: ComparisonStats;
 }
 
 export const ShareSection: React.FC<ShareSectionProps> = ({ stats }) => {
-  const [isVK, setIsVK] = useState(isVKBridge);
+  const [storyAvailable, setStoryAvailable] = useState(false);
+  const nativeShareAvailable = useRef(false);
   const [pendingShare, setPendingShare] = useState<'story' | 'link' | null>(null);
   const [status, setStatus] = useState<string | null>(null);
+  const [manualShare, setManualShare] = useState(false);
+  const [dialogTimedOut, setDialogTimedOut] = useState(false);
+  const pendingRef = useRef(false);
   const presentation = getResultPresentation(stats);
+  const appLink = getAppLink();
+  const shareText = `Наш ритм вдвоём: ${presentation.title}. Пройдите квиз «Любовь в деталях» — детали останутся между вами.`;
+  const manualText = `${shareText}\n${appLink ?? ''}`;
 
   useEffect(() => {
-    void checkVKBridge().then(setIsVK);
+    let mounted = true;
+    void vkBridgeService.supportsStories().then((supported) => { if (mounted) setStoryAvailable(supported); });
+    void vkBridgeService.supports('VKWebAppShare').then((supported) => { if (mounted) nativeShareAvailable.current = supported; });
+    return () => { mounted = false; };
+  }, []);
+
+  const handleFailure = useCallback((error: unknown, kind: 'story' | 'link') => {
+    trackShare(kind, false);
+    if (isUserCancelError(error) || (error instanceof DOMException && error.name === 'AbortError')) return;
+    if (error instanceof BridgeTimeoutError) {
+      setDialogTimedOut(true);
+      setStatus('Редактор пока не ответил. Проверьте открытое окно; ссылку можно скопировать ниже.');
+    } else {
+      setStatus('Не получилось открыть отправку. Скопируйте приглашение ниже — ответы останутся между вами.');
+    }
+    setManualShare(true);
   }, []);
 
   const handleShareStory = useCallback(async () => {
-    if (pendingShare) return;
+    if (pendingRef.current || dialogTimedOut || !storyAvailable) return;
+    pendingRef.current = true;
     setPendingShare('story');
     setStatus(null);
     try {
       const blob = await generateStoryImage(stats);
-      const result = await vkBridgeService.showStory(blob, getAppLink());
+      const result = await vkBridgeService.showStory(blob, appLink);
       const success = result.result === true;
       trackShare('story', success);
       setStatus(success ? 'Редактор истории открыт — добавьте свой штрих и публикуйте.' : null);
-    } catch {
-      trackShare('story', false);
-      setStatus('Не получилось открыть историю. Попробуйте ещё раз внутри приложения VK.');
+    } catch (error) {
+      handleFailure(error, 'story');
     } finally {
+      pendingRef.current = false;
       setPendingShare(null);
     }
-  }, [pendingShare, stats]);
+  }, [appLink, dialogTimedOut, handleFailure, stats, storyAvailable]);
 
   const handleShareLink = useCallback(async () => {
-    if (pendingShare) return;
+    if (pendingRef.current || dialogTimedOut || !appLink) return;
+    pendingRef.current = true;
     setPendingShare('link');
     setStatus(null);
     try {
-      const result = await vkBridgeService.shareApp(getAppLink());
-      const success = result.length > 0;
-      trackShare('link', success);
-      setStatus(success ? 'Ссылка отправлена.' : null);
-    } catch {
-      trackShare('link', false);
-      setStatus('Не получилось открыть отправку. Результат и ответы останутся на месте.');
+      if (nativeShareAvailable.current) {
+        const outcome = classifyShareResponse(await vkBridgeService.shareApp(appLink));
+        if (outcome === 'failed') throw new Error('Share failed');
+        trackShare('link', outcome === 'success');
+        setStatus(outcome === 'success' ? 'Отправка ссылки завершена.' : null);
+      } else if (navigator.share) {
+        await navigator.share({ title: 'Любовь в деталях', text: shareText, url: appLink });
+        trackShare('link', true);
+      } else {
+        setManualShare(true);
+      }
+    } catch (error) {
+      handleFailure(error, 'link');
     } finally {
+      pendingRef.current = false;
       setPendingShare(null);
     }
-  }, [pendingShare]);
+  }, [appLink, dialogTimedOut, handleFailure, shareText]);
+
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(manualText);
+      setStatus('Приглашение скопировано.');
+      trackShare('link', true);
+    } catch {
+      setStatus('Выделите приглашение ниже и скопируйте его вручную.');
+    }
+  }, [manualText]);
 
   return (
     <section className="share-section" aria-labelledby="share-section-title">
@@ -82,33 +126,41 @@ export const ShareSection: React.FC<ShareSectionProps> = ({ stats }) => {
           <p>Только настроение вашей пары и приглашение пройти квиз — детали останутся между вами.</p>
         </div>
 
-        {isVK ? (
+        {(storyAvailable || appLink) ? (
           <div className="share-section__buttons">
-            <Button
+            {storyAvailable && <Button
               size="l"
               className="gradient-button share-section__story-button"
               before={<Icon28StoryOutline />}
               loading={pendingShare === 'story'}
-              disabled={pendingShare !== null}
+              disabled={pendingShare !== null || dialogTimedOut}
               onClick={() => void handleShareStory()}
             >
               В историю
-            </Button>
-            <Button
+            </Button>}
+            {appLink && <Button
               size="l"
               mode="secondary"
               before={<Icon24ShareOutline />}
               loading={pendingShare === 'link'}
-              disabled={pendingShare !== null}
+              disabled={pendingShare !== null || dialogTimedOut}
               onClick={() => void handleShareLink()}
             >
               Отправить ссылку
-            </Button>
+            </Button>}
           </div>
         ) : (
           <p className="share-section__note">
-            Публикация откроется при запуске приложения внутри VK
+            Ссылка для приглашения в Одноклассниках появится после настройки адреса приложения.
           </p>
+        )}
+
+        {manualShare && appLink && (
+          <div className="share-section__manual">
+            <label htmlFor="share-invitation">Приглашение без личных ответов</label>
+            <textarea id="share-invitation" readOnly value={manualText} rows={5} onFocus={(event) => event.currentTarget.select()} />
+            <Button size="m" mode="secondary" onClick={() => void handleCopy()}>Копировать приглашение</Button>
+          </div>
         )}
 
         {status && <p className="share-section__status" role="status">{status}</p>}

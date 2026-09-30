@@ -1,4 +1,6 @@
 import { initializeVKBridge, isVKBridgeAvailable } from '../services/vkBridge';
+import { platformContext, VK_APP_ID } from './platformPolicy';
+export { withTimeout } from './timeout';
 
 let didLogMode = false;
 
@@ -15,19 +17,8 @@ export function isVKBridge(): boolean {
   return isVKBridgeAvailable();
 }
 
-export const APP_ID = 54445864;
+export const APP_ID = Number(VK_APP_ID);
 
-export function getAppLink(): string {
-  return `https://vk.com/app${APP_ID}`;
-}
-
-export function withTimeout<T>(
-  promise: Promise<T>,
-  timeoutMs: number,
-  errorMessage = 'Operation timed out',
-): Promise<T> {
-  const timeout = new Promise<never>((_, reject) =>
-    setTimeout(() => reject(new Error(errorMessage)), timeoutMs)
-  );
-  return Promise.race([promise, timeout]);
+export function getAppLink(): string | null {
+  return platformContext.appLink;
 }

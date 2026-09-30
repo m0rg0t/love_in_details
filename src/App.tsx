@@ -36,6 +36,7 @@ import {
   trackWeeklyThemeComplete,
   trackWeeklyThemeStart,
 } from './utils/analytics';
+import { platformContext } from './utils/platformPolicy';
 import { checkVKBridge } from './utils/platform';
 import { isDebugMode, getDebugPanel, getDebugState } from './utils/debugMode';
 import type { PanelId, Answer, QuestionPackId, QuizMode } from './types';
@@ -82,7 +83,7 @@ const App: React.FC = () => {
     startupHandledRef.current = true;
 
     void checkVKBridge().then((isVK) => {
-      trackAppStart(isVK ? 'vk' : 'standalone', Boolean(savedProgress));
+      trackAppStart(platformContext.platform, Boolean(savedProgress));
       if (isVK) void showBannerAd();
     });
   }, [savedProgress, showBannerAd]);

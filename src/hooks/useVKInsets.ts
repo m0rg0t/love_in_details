@@ -50,8 +50,8 @@ export function useVKInsets(): VKInsets {
         const config = await vkBridgeService.getConfig();
         const configWithInsets = config as { insets?: VKInsets };
         if (mounted && configWithInsets.insets) handleInsets(configWithInsets.insets);
-      } catch (error) {
-        console.warn('[useVKInsets] Failed to get initial config:', error);
+      } catch {
+        console.warn('[useVKInsets] Initial config unavailable');
       }
 
       return () => { vkBridgeService.unsubscribe(handleEvent); };

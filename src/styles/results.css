@@ -1244,7 +1244,7 @@
   }
 }
 
-@media (max-width: 350px) {
+@media (max-width: 420px) {
   .share-section {
     grid-template-columns: 1fr;
   }
@@ -1255,3 +1255,6 @@
     margin: 0 auto;
   }
 }
+
+.share-section__manual { display: grid; gap: var(--space-sm); margin-top: var(--space-md); }
+.share-section__manual textarea { box-sizing: border-box; width: 100%; resize: vertical; padding: var(--space-sm); border-radius: 12px; font: inherit; color: var(--vkui--color_text_primary); background: var(--vkui--color_background_content); }

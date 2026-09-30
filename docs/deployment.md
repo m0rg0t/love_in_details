@@ -8,6 +8,7 @@ one target must not replace or delete the last working version on the other.
 - Project: `vk-mini-apps`
 - Environment: `production`
 - Resource: `love-in-details-ru1`
+- Resource UUID: `1fqqt1icfldb6hqo26dmpkn3`
 - Server: `firstvds-multiradio-ru1` (RU, `linux/amd64`)
 - Public URL: <https://love-in-details.pixel-and-byte.ru>
 - Build pack: `Dockerfile`
@@ -62,3 +63,24 @@ When publishing a new VK Hosting version, follow these rules:
 - Coolify/VDS outage: manually point the VK application URLs to the retained VK
   Hosting version.
 - VK Hosting outage: keep the application URLs on the Coolify domain.
+
+## OK support release (2026-10-01)
+
+The shared frontend now selects OK behavior for `vk_client=ok` and shares
+<https://ok.ru/app/512004459603>. See [`ok-support.md`](ok-support.md) for local
+verification and the real-client checks that remain unverified.
+
+The owner authorized commit and push to `main`; follow the webhook deployment
+for that exact commit instead of starting a second build. Verify `/healthz`,
+the public HTML, and every linked JS/CSS asset against the local production
+build. This application has no backend service, database, or mutable server
+volume; quiz progress and history stay in the browser.
+
+The previous known source for rollback is `3aa6ff8` (weekly theme and private
+result sharing). Redeploy that source through the existing Coolify resource
+if the OK release regresses. Platform settings and moderation are separate.
+
+The operational release record is kept at `/root/love-in-details-ok-release.md`
+on ru1 and `love-in-details-ok-release.md` in the configured infrastructure
+vault. It records the pushed SHA, webhook deployment UUID, health and bundle
+verification after deployment; it contains no launch parameters or tokens.

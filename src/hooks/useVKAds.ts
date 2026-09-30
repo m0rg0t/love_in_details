@@ -18,8 +18,8 @@ export function useVKAds() {
       const result = await vkBridgeService.showInterstitialAd();
       trackAdShow('interstitial', result.result);
       return result.result;
-    } catch (err) {
-      console.error('[Ads] Interstitial error:', err);
+    } catch {
+      console.warn('[Ads] Interstitial unavailable');
       trackAdShow('interstitial', false);
       return false;
     }
@@ -36,8 +36,8 @@ export function useVKAds() {
         return true;
       }
       return false;
-    } catch (err) {
-      console.error('[Ads] Banner error:', err);
+    } catch {
+      console.warn('[Ads] Banner unavailable');
       trackAdShow('banner', false);
       return false;
     }
@@ -49,8 +49,8 @@ export function useVKAds() {
       await vkBridgeService.hideBannerAd();
       setBannerVisible(false);
       return true;
-    } catch (err) {
-      console.error('[Ads] Hide banner error:', err);
+    } catch {
+      console.warn('[Ads] Hide banner unavailable');
       return false;
     }
   }, []);

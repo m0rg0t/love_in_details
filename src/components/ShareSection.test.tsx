@@ -2,7 +2,6 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { vkBridgeService } from '../services/vkBridge';
 import { trackShare } from '../utils/analytics';
-import { checkVKBridge } from '../utils/platform';
 import { generateStoryImage } from '../utils/storyCanvas';
 import { ShareSection } from './ShareSection';
 
@@ -14,6 +13,8 @@ vi.mock('../utils/platform', () => ({
 
 vi.mock('../services/vkBridge', () => ({
   vkBridgeService: {
+    supportsStories: vi.fn(),
+    supports: vi.fn(),
     showStory: vi.fn(),
     shareApp: vi.fn(),
   },
@@ -35,7 +36,6 @@ const stats = {
   summaryMessage: 'Тест',
 };
 
-const mockedCheckVKBridge = vi.mocked(checkVKBridge);
 const mockedBridgeService = vi.mocked(vkBridgeService);
 const mockedGenerateStoryImage = vi.mocked(generateStoryImage);
 const mockedTrackShare = vi.mocked(trackShare);
@@ -59,7 +59,8 @@ beforeAll(() => {
 describe('ShareSection', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockedCheckVKBridge.mockResolvedValue(true);
+    mockedBridgeService.supportsStories.mockResolvedValue(true);
+    mockedBridgeService.supports.mockResolvedValue(true);
     mockedGenerateStoryImage.mockResolvedValue('data:image/jpeg;base64,story');
     mockedBridgeService.showStory.mockResolvedValue({ result: true });
     mockedBridgeService.shareApp.mockResolvedValue([{ type: 'link' }]);
@@ -90,22 +91,46 @@ describe('ShareSection', () => {
   });
 
   it('fails open when the story editor is declined', async () => {
-    mockedBridgeService.showStory.mockRejectedValue(new Error('declined'));
+    mockedBridgeService.showStory.mockRejectedValue({ error_type: 'client_error', error_data: { error_code: 4 } });
     render(<ShareSection stats={stats} />);
 
     fireEvent.click(await screen.findByRole('button', { name: 'В историю' }));
 
-    expect(await screen.findByRole('status')).not.toBeNull();
+    await waitFor(() => expect(mockedTrackShare).toHaveBeenCalledWith('story', false));
+    expect(screen.queryByRole('status')).toBeNull();
     expect(mockedTrackShare).toHaveBeenCalledWith('story', false);
-    expect(screen.queryByText(/Не получилось открыть историю/)).not.toBeNull();
+    expect(screen.queryByRole('button', { name: 'Копировать приглашение' })).toBeNull();
   });
 
-  it('keeps the result preview visible outside VK without fake share controls', async () => {
-    mockedCheckVKBridge.mockResolvedValue(false);
+  it('keeps browser sharing usable without a native host', async () => {
+    mockedBridgeService.supportsStories.mockResolvedValue(false);
+    mockedBridgeService.supports.mockResolvedValue(false);
     render(<ShareSection stats={stats} />);
 
-    expect(await screen.findByText(/Публикация откроется/)).not.toBeNull();
+    fireEvent.click(await screen.findByRole('button', { name: 'Отправить ссылку' }));
+    expect(await screen.findByRole('button', { name: 'Копировать приглашение' })).not.toBeNull();
+    expect(mockedBridgeService.shareApp).not.toHaveBeenCalled();
     expect(screen.queryByLabelText(/Карточка результата/)).not.toBeNull();
     expect(screen.queryByRole('button', { name: 'В историю' })).toBeNull();
   });
+  it('offers manual sharing for malformed native responses', async () => {
+    mockedBridgeService.shareApp.mockResolvedValue([{ type: 'unexpected' }] as never);
+    render(<ShareSection stats={stats} />);
+    await waitFor(() => expect(mockedBridgeService.supports).toHaveBeenCalled());
+    fireEvent.click(screen.getByRole('button', { name: 'Отправить ссылку' }));
+    expect(await screen.findByRole('button', { name: 'Копировать приглашение' })).not.toBeNull();
+    expect(screen.getByLabelText('Приглашение без личных ответов').textContent).toContain('https://vk.com/app54445864');
+    expect(mockedTrackShare).toHaveBeenCalledWith('link', false);
+  });
+
+  it('keeps empty share response cancellation quiet', async () => {
+    mockedBridgeService.shareApp.mockResolvedValue([]);
+    render(<ShareSection stats={stats} />);
+    await waitFor(() => expect(mockedBridgeService.supports).toHaveBeenCalled());
+    fireEvent.click(screen.getByRole('button', { name: 'Отправить ссылку' }));
+    await waitFor(() => expect(mockedTrackShare).toHaveBeenCalledWith('link', false));
+    expect(screen.queryByRole('status')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Копировать приглашение' })).toBeNull();
+  });
+
 });

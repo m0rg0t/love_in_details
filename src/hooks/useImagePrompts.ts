@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { vkBridgeService } from '../services/vkBridge';
+import { platformContext } from '../utils/platformPolicy';
 import { isVKBridge } from '../utils/platform';
 import {
   IMAGE_PROMPTS_APP_ID,
@@ -20,6 +21,7 @@ function openStandalone(url: string): void {
 
 export function useImagePrompts() {
   const openImagePrompt = useCallback(async (promptId: string, source: PromptOpenSource) => {
+    if (!platformContext.showVKPromotions) return;
     if (isVKBridge()) {
       try {
         await vkBridgeService.openApp(
@@ -28,8 +30,8 @@ export function useImagePrompts() {
         );
         trackOpenImagePrompts(promptId, source, true);
         return;
-      } catch (error) {
-        console.warn('[Image prompts] VK app handoff failed, opening web link:', error);
+      } catch {
+        console.warn('[Image prompts] App handoff failed');
       }
     }
 

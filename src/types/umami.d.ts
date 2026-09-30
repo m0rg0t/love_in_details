@@ -1,7 +1,15 @@
-interface UmamiTracker {
-  track(event: string, data?: Record<string, string | number>): void;
+interface UmamiPayload {
+  website: string;
+  hostname: string;
+  url: string;
+  referrer: string;
+  title: string;
+  language: string;
+  screen: string;
+  name?: string;
+  data?: Record<string, string | number>;
 }
 
 interface Window {
-  umami?: UmamiTracker;
+  umami?: { track: (payload: UmamiPayload) => void };
 }

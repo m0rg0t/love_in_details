@@ -14,6 +14,7 @@ import { DEFAULT_COUPLE_PROMPT_ID } from '../utils/imagePrompts';
 import type { SessionHistoryEntry } from '../utils/sessionHistory';
 import type { WeeklyTheme } from '../utils/weeklyTheme';
 import type { PanelId, PlayerLabel, QuestionPackId, QuizMode } from '../types';
+import { platformContext } from '../utils/platformPolicy';
 import { WeeklyThemeCard } from './WeeklyThemeCard';
 
 export interface ResumeQuizSummary {
@@ -194,7 +195,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           </div>
         </div>
 
-        <div className="welcome__prompt-link">
+        {platformContext.showVKPromotions && <div className="welcome__prompt-link">
           <Button
             size="m"
             mode="secondary"
@@ -205,7 +206,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             Идеи для фото вдвоём
           </Button>
           <span className="welcome__prompt-note">Love is…, кино и яркие стили</span>
-        </div>
+        </div>}
       </div>
     </Panel>
   );

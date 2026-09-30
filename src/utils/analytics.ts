@@ -1,14 +1,43 @@
 import type { PanelId, QuestionPackId, QuizMode } from '../types';
 import type { ResultTone } from './resultPresentation';
 
-declare global {
-  interface Window {
-    umami?: { track: (event: string, data?: Record<string, string | number>) => void };
-  }
+const WEBSITE_ID = '634d5cfa-226f-49c0-89cc-468720deb73c';
+const pendingEvents: Array<{ event: string; data?: Record<string, string | number> }> = [];
+
+export function sanitizeReferrer(value: string): string {
+  try {
+    const url = new URL(value);
+    return ['http:', 'https:'].includes(url.protocol) ? `${url.origin}${url.pathname}` : '';
+  } catch { return ''; }
 }
 
-function track(event: string, data?: Record<string, string | number>) {
-  try { window.umami?.track(event, data); } catch { /* silently ignore */ }
+function track(event?: string, data?: Record<string, string | number>) {
+  if (!window.umami) {
+    if (event && pendingEvents.length < 50) pendingEvents.push({ event, data });
+    return;
+  }
+  try {
+    // Object payload avoids Umami's default signed URL/referrer on every event.
+    window.umami?.track({
+      website: WEBSITE_ID,
+      hostname: window.location.hostname,
+      url: window.location.pathname,
+      referrer: sanitizeReferrer(document.referrer),
+      title: 'Любовь в деталях',
+      language: navigator.language,
+      screen: `${window.screen.width}x${window.screen.height}`,
+      ...(event ? { name: event, data } : {}),
+    });
+  } catch { /* Analytics must never interrupt the quiz. */ }
+}
+
+export function initializeAnalytics(): void {
+  const ready = () => {
+    track();
+    for (const { event, data } of pendingEvents.splice(0)) track(event, data);
+  };
+  if (window.umami) ready();
+  else document.getElementById('umami-script')?.addEventListener('load', ready, { once: true });
 }
 
 function bool(value: boolean): number {
@@ -17,7 +46,7 @@ function bool(value: boolean): number {
 
 export type PromptOpenSource = 'welcome' | 'results';
 
-export function trackAppStart(mode: 'vk' | 'standalone', hasSavedProgress = false) {
+export function trackAppStart(mode: 'vk' | 'ok' | 'standalone', hasSavedProgress = false) {
   track('app_start', { mode, has_saved_progress: bool(hasSavedProgress) });
 }
 

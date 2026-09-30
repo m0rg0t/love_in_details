@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button, Caption, Text, Title } from '@vkontakte/vkui';
 import { Icon24ArrowRightOutline, Icon24MagicWandOutline } from '@vkontakte/icons';
+import { platformContext } from '../utils/platformPolicy';
 import { useImagePrompts } from '../hooks/useImagePrompts';
 import { choosePromptPreview, CURATED_PROMPT_IDEAS } from '../utils/imagePrompts';
 
@@ -10,6 +11,8 @@ const selectedPreviews = new Map(
 
 export const PromptIdeasCard: React.FC = () => {
   const { openImagePrompt } = useImagePrompts();
+
+  if (!platformContext.showVKPromotions) return null;
 
   return (
     <section className="prompt-ideas" aria-labelledby="prompt-ideas-title">

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from '@vkontakte/vkui';
 import { Icon24BookmarkCheckOutline, Icon24BookmarkOutline } from '@vkontakte/icons';
+import { platformContext } from '../utils/platformPolicy';
 import { useAddToFavorites } from '../hooks/useAddToFavorites';
 
 export const FavoriteReturnCard: React.FC = () => {
@@ -12,7 +13,7 @@ export const FavoriteReturnCard: React.FC = () => {
     addToFavorites,
   } = useAddToFavorites();
 
-  if (isChecking || !isAvailable) return null;
+  if (platformContext.platform === 'ok' || isChecking || !isAvailable) return null;
 
   return (
     <section className={`favorite-return${isAdded ? ' favorite-return--added' : ''}`}>
