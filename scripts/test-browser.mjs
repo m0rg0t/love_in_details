@@ -24,30 +24,31 @@ try {
       await page.goto(`${base}/?debug=true&panel=results`, { waitUntil: 'networkidle0' });
       await page.waitForSelector('.welcome__full-button');
       assert.equal(await page.$('.results'), null, 'production must ignore debug shortcuts');
-      await page.click('.welcome__full-button');
+      await page.locator('.welcome__full-button').click();
       for (let player = 0; player < 2; player += 1) {
+        const panel = player === 0 ? '#quiz-a' : '#quiz-b';
         for (let index = 0; index < 12; index += 1) {
-          await page.waitForSelector('.quiz__question-text');
-          const question = await page.$eval('.quiz__question-text', element => element.textContent);
-          if (await page.$('.quiz textarea')) await page.type('.quiz textarea', 'Тестовый ответ');
-          else await page.click('.quiz [role="radio"]');
-          await page.waitForFunction(() => !document.querySelector('.quiz__footer .gradient-button')?.disabled);
-          await page.click('.quiz__footer .gradient-button');
-          await page.waitForFunction(previous => {
-            const current = document.querySelector('.quiz__question-text');
+          await page.waitForSelector(`${panel} .quiz__question-text`, { visible: true });
+          const question = await page.$eval(`${panel} .quiz__question-text`, element => element.textContent);
+          console.log(`${width}px: player ${player + 1}, question ${index + 1}`);
+          if (await page.$(`${panel} textarea`)) await page.locator(`${panel} textarea`).fill('Тестовый ответ');
+          else await page.locator(`${panel} [role="radio"]`).click();
+          await page.locator(`${panel} .quiz__footer .gradient-button`).click();
+          await page.waitForFunction((previous, panelSelector) => {
+            const current = document.querySelector(`${panelSelector} .quiz__question-text`);
             return !current || current.textContent !== previous;
-          }, {}, question);
+          }, {}, question, panel);
           if (player === 0 && index === 2) {
             await page.reload({ waitUntil: 'networkidle0' });
             await page.waitForSelector('#welcome-resume-title');
-            await page.click('.welcome-resume button');
-            await page.waitForSelector('.quiz__question-text');
+            await page.locator('.welcome-resume button').click();
+            await page.waitForSelector(`${panel} .quiz__question-text`, { visible: true });
           }
         }
         if (player === 0) {
           await page.waitForSelector('.handoff__button');
           assert.equal(await page.$('.quiz'), null, 'handoff must hide first-player answers');
-          await page.click('.handoff__button');
+          await page.locator('.handoff__button').click();
         }
       }
       await page.waitForSelector('.results-details__toggle');
@@ -56,7 +57,7 @@ try {
       assert.equal(history.entries.length, 1);
       assert.equal(history.entries[0].totalQuestions, 12);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `overflow at ${width}px`);
-      await page.click('.results-details__toggle');
+      await page.locator('.results-details__toggle').click();
       await page.waitForSelector('.results-cards');
       await page.reload({ waitUntil: 'networkidle0' });
       await page.waitForSelector('.welcome-return');
