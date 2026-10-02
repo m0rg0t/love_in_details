@@ -22,6 +22,16 @@ describe('quizReducer navigation', () => {
     expect(nextState.answersA).toEqual(quizState.answersA);
   });
 
+  it('does not move beyond the last question after repeated next actions', () => {
+    const nextState = quizReducer(quizState, { type: 'NEXT_QUESTION' });
+    expect(nextState.currentQuestion).toBe(4);
+    expect(quizReducer(nextState, { type: 'NEXT_QUESTION' }).currentQuestion).toBe(4);
+  });
+
+  it('does not advance an empty quiz', () => {
+    expect(quizReducer({ ...quizState, currentQuestion: 0, questionIds: [] }, { type: 'NEXT_QUESTION' }).currentQuestion).toBe(0);
+  });
+
   it('does not move before the first question', () => {
     const nextState = quizReducer(
       { ...quizState, currentQuestion: 0 },

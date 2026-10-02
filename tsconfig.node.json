@@ -10,9 +10,7 @@
     "moduleResolution": "bundler",
     "isolatedModules": true,
     "moduleDetection": "force",
-    "composite": true,
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "noEmit": true,
 
     /* Linting */
     "strict": true,

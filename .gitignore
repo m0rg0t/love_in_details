@@ -49,3 +49,5 @@ vite.config.js
 # Screenshots
 screenshots/output/
 dogfood-output/
+
+test-results/

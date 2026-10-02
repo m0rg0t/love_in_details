@@ -5,7 +5,8 @@ import type { Answers, PanelId, QuestionPackId, QuizMode, QuizState } from '../t
 const STORAGE_KEY = 'love-in-details:quiz-progress:v1';
 const STORAGE_VERSION = 2;
 const PROGRESS_TTL_MS = 7 * 24 * 60 * 60 * 1000;
-const VALID_QUESTION_IDS = new Set(allQuestions.map((question) => question.id));
+const QUESTIONS_BY_ID = new Map(allQuestions.map((question) => [question.id, question]));
+const VALID_QUESTION_IDS = new Set(QUESTIONS_BY_ID.keys());
 const BASE_QUESTION_IDS = new Set(questions.map((question) => question.id));
 const IN_PROGRESS_PANELS: PanelId[] = ['quiz-a', 'handoff', 'quiz-b'];
 
@@ -36,9 +37,22 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function isAnswers(value: unknown, questionIds: string[]): value is Answers {
   if (!isRecord(value)) return false;
-  return Object.entries(value).every(([questionId, answer]) =>
-    questionIds.includes(questionId) && (typeof answer === 'string' || typeof answer === 'number'),
-  );
+  return Object.entries(value).every(([questionId, answer]) => {
+    if (!questionIds.includes(questionId)) return false;
+    const question = QUESTIONS_BY_ID.get(questionId);
+    if (!question) return false;
+    switch (question.type) {
+      case 'single':
+      case 'binary':
+        return typeof answer === 'string' && question.options.some(option => option.value === answer);
+      case 'scale':
+        return typeof answer === 'number' && Number.isInteger(answer)
+          && answer >= question.min && answer <= question.max;
+      case 'text':
+        // Empty text is valid while a question is still being edited.
+        return typeof answer === 'string' && answer.length <= question.maxLength;
+    }
+  });
 }
 
 function isQuizMode(value: unknown): value is QuizMode {

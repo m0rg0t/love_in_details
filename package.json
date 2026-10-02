@@ -5,12 +5,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host --port 10888",
-    "build": "tsc -b && vite build",
+    "build": "npm run typecheck && vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
     "predeploy": "npm run build",
-    "deploy": "vk-miniapps-deploy"
+    "deploy": "vk-miniapps-deploy",
+    "lint": "oxlint --deny-warnings src scripts vite.config.ts",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.node.json --noEmit",
+    "check": "npm run lint && npm run typecheck && npm test && npm run build",
+    "test:browser": "node scripts/test-browser.mjs"
   },
   "engines": {
     "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
@@ -24,25 +28,26 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@vkontakte/icons": "^3.70.0",
+    "@vkontakte/icons": "^3.74.0",
     "@vkontakte/vk-bridge": "^3.0.2",
     "@vkontakte/vk-bridge-react": "^2.0.1",
-    "@vkontakte/vkui": "^8.4.0",
+    "@vkontakte/vkui": "^8.4.1",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
-    "@types/node": "^26.6.1",
+    "@types/node": "^26.6.4",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.1",
-    "@vkontakte/vk-miniapps-deploy": "^1.0.2",
-    "jsdom": "^30.1.0",
-    "puppeteer": "^25.11.0",
+    "@vkontakte/vk-miniapps-deploy": "^1.0.3",
+    "jsdom": "^30.1.1",
+    "puppeteer": "^25.12.0",
     "typescript": "^7.0.2",
-    "vite": "^8.3.0",
-    "vitest": "^5.0.1"
+    "vite": "^8.3.2",
+    "vitest": "^5.0.3",
+    "oxlint": "^1.86.0"
   }
 }

@@ -6,6 +6,7 @@ import {
   saveQuizProgress,
 } from './quizProgress';
 import { getQuestionPack } from '../data/questionPacks';
+import { questions } from '../data/questions';
 
 function createStorage() {
   const values = new Map<string, string>();
@@ -106,5 +107,43 @@ describe('quiz progress persistence', () => {
 
     expect(loadQuizProgress(storage, new Date('2026-09-20T12:01:00.000Z').getTime())?.state.packId)
       .toBeNull();
+  });
+});
+
+
+describe('saved answer validation', () => {
+  const fullState: QuizState = {
+    ...progressState, mode: 'full', questionIds: questions.map(question => question.id),
+    answersA: {}, answersB: {},
+  };
+
+  it.each([
+    ['support-comfort', 'unknown'],
+    ['comm-conflict', 1],
+    ['comm-expressing', -1],
+    ['comm-expressing', 6],
+    ['comm-expressing', 2.5],
+    ['comm-expressing', '3'],
+    ['support-feeling-loved', 42],
+    ['support-feeling-loved', 'x'.repeat(201)],
+  ])('rejects a malformed stored answer for %s: %s', (questionId, answer) => {
+    const storage = createStorage();
+    const state = { ...fullState, answersA: { [questionId]: answer } };
+    expect(saveQuizProgress(state, storage)).toBeNull();
+    storage.setItem('love-in-details:quiz-progress:v1', JSON.stringify({
+      version: 2, savedAt: new Date().toISOString(), state,
+    }));
+    expect(loadQuizProgress(storage)).toBeNull();
+    expect(storage.getItem('love-in-details:quiz-progress:v1')).toBeNull();
+  });
+
+  it('keeps valid scale boundaries and unfinished text input', () => {
+    const storage = createStorage();
+    const state = { ...fullState, answersA: {
+      'comm-expressing': 1, 'time-together': 5,
+      'support-feeling-loved': '', 'dir-important-now': 'x'.repeat(200),
+    } };
+    expect(saveQuizProgress(state, storage)).not.toBeNull();
+    expect(loadQuizProgress(storage)?.state).toEqual(state);
   });
 });

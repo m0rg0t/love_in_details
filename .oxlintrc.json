@@ -1,0 +1,32 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": [
+    "typescript",
+    "react",
+    "oxc",
+    "unicorn"
+  ],
+  "categories": {
+    "correctness": "error"
+  },
+  "env": {
+    "browser": true,
+    "node": true
+  },
+  "ignorePatterns": [
+    "dist",
+    "node_modules",
+    "coverage",
+    "screenshots/output"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "src/hooks/useQuizState.ts"
+      ],
+      "rules": {
+        "react/set-state-in-effect": "off"
+      }
+    }
+  ]
+}
