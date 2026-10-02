@@ -43,7 +43,7 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
     }
 
     case 'NEXT_QUESTION':
-      return { ...state, currentQuestion: state.currentQuestion + 1 };
+      return { ...state, currentQuestion: Math.min(state.currentQuestion + 1, Math.max(0, state.questionIds.length - 1)) };
 
     case 'PREVIOUS_QUESTION':
       return { ...state, currentQuestion: Math.max(0, state.currentQuestion - 1) };
@@ -84,6 +84,8 @@ export function useQuizState() {
     () => loadQuizProgress(),
   );
 
+  // This effect synchronizes the resumable snapshot with optional local storage.
+  // Keep the in-memory fallback aligned when storage is available.
   useEffect(() => {
     if (state.panel === 'quiz-a' || state.panel === 'handoff' || state.panel === 'quiz-b') {
       const snapshot = saveQuizProgress(state);

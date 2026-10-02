@@ -1,9 +1,9 @@
 # syntax=docker/dockerfile:1.7
 
-FROM node:24.18.1-bookworm-slim AS builder
+FROM node:24-bookworm-slim AS builder
 
 WORKDIR /app
-ENV CI=true
+ENV CI=true PUPPETEER_SKIP_DOWNLOAD=true
 
 COPY package.json package-lock.json ./
 RUN npm ci --include=dev --include=optional

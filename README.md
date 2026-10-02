@@ -92,3 +92,30 @@ src/
 - [VK Mini Apps документация](https://dev.vk.com/mini-apps)
 - [VKUI компоненты](https://vkcom.github.io/VKUI/)
 - [VK Bridge API](https://dev.vk.com/bridge/overview)
+
+## Automated maintenance checks
+
+Use Node.js 24 LTS (`.nvmrc`). `npm ci && npm run check` runs Oxlint correctness
+checks, TypeScript 7 checks for app and Vite config, 106 unit/integration tests,
+and a production build. Direct npm dependencies were checked against stable
+`latest` versions on 2026-10-02.
+
+`npm run test:browser` starts and stops a local production preview itself. It
+uses the existing Puppeteer runner to complete the full two-person quiz at
+360px and 1280px, reload/resume unfinished progress, verify the handoff hides
+answers, and check saved results/history and production debug isolation.
+External requests are blocked in this test. Set `CHROME_PATH` to an installed
+Chrome/Chromium executable when Puppeteer's browser download is unavailable.
+CI uses Chrome already installed on the GitHub runner and sets
+`PUPPETEER_SKIP_DOWNLOAD=true`; Docker also skips this unnecessary download.
+
+The original `scripts/verify-ok-support.mjs` remains a separate VK/OK mock
+matrix that requires a supplied Umami script fixture. Neither browser harness
+proves actual native host ads, permissions or overlays. Those still require a
+real VK/OK client smoke test before release.
+
+Saved quiz answers now enforce each question's option/range/text-length rules,
+and repeated next actions cannot advance beyond the final question. Existing
+valid snapshots and version-1 migration remain supported. The storage-sync
+hook deliberately exempts Oxlint's `react/set-state-in-effect` performance rule:
+its effect persists and synchronizes the resumable local-storage snapshot.
